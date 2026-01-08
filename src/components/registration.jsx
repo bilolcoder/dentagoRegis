@@ -224,7 +224,7 @@ const Registration = () => {
             gender: gender,
             phone: fullPhone,
             role: userType, // API ga userType yuboriladi
-            userType: userType, // userType ham yuboriladi
+            userType: userType, // userType ham yuboriladi nima gap
             serviceId: true,
             location: userLocation ? {
                 latitude: userLocation.latitude,
