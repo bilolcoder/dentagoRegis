@@ -2,6 +2,8 @@ export const translations = {
     uz: {
         // Sidebar Main
         main: "Asosiy",
+        my_information: "Ma'lumotlarim",
+        bemorlarim: "Bemorlarim",
         calendar: "Taqvim",
         queue: "Navbat",
         my_results: "Natijalarim",

@@ -19,9 +19,10 @@ const Registration = () => {
     const [profileImage, setProfileImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
     const [gender, setGender] = useState('male');
-    const [userType, setUserType] = useState('user'); // "Bemor" o'rniga "user"
+    const [userType, setUserType] = useState('user');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSmsStep, setIsSmsStep] = useState(false);
     const [smsCode, setSmsCode] = useState('');
     const [countdown, setCountdown] = useState(0);
@@ -31,6 +32,8 @@ const Registration = () => {
     const [locationStatus, setLocationStatus] = useState('pending');
     const [userLocation, setUserLocation] = useState(null);
     const [isGeolocating, setIsGeolocating] = useState(false);
+    const [isSmsSent, setIsSmsSent] = useState(false);
+    const [canResendSms, setCanResendSms] = useState(false);
 
     const inputsRef = useRef([]);
     const dropdownRef = useRef(null);
@@ -46,6 +49,24 @@ const Registration = () => {
         }, 2000);
         return () => clearTimeout(timer);
     }, [isSmsStep, locationStatus]);
+
+    // Countdown timer
+    useEffect(() => {
+        let timer;
+        if (countdown > 0) {
+            timer = setInterval(() => {
+                setCountdown(prev => {
+                    if (prev <= 1) {
+                        clearInterval(timer);
+                        setCanResendSms(true);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        }
+        return () => clearInterval(timer);
+    }, [countdown]);
 
     // GPS ni olish funksiyasi
     const getGeolocation = () => {
@@ -172,7 +193,13 @@ const Registration = () => {
         return `${day}.${month}.${year}`;
     };
 
-    const sendSmsForRegistration = async () => {
+    const sendSmsForRegistration = async (isResend = false) => {
+        // SMS allaqachon yuborilgan va countdown davom etayotgan bo'lsa, to'xtatish
+        if (isSmsSent && !isResend && !canResendSms) {
+            setError('SMS allaqachon yuborilgan. Iltimos kuting.');
+            return;
+        }
+
         setIsLoading(true);
         setError('');
         const cleanPhone = getCleanPhoneNumber();
@@ -186,14 +213,17 @@ const Registration = () => {
             });
             const data = await response.json();
             if (response.ok && data.success) {
+                // SMS muvaffaqiyatli yuborilganda
+                setIsSmsSent(true);
+                setCanResendSms(false);
                 setCountdown(60);
-                setIsSmsStep(true);
-                const timer = setInterval(() => {
-                    setCountdown(prev => {
-                        if (prev <= 1) { clearInterval(timer); return 0; }
-                        return prev - 1;
-                    });
-                }, 1000);
+
+                // Agar SMS qayta yuborilayotgan bo'lsa, sahifani o'zgartirmaymiz
+                if (!isResend) {
+                    setIsSmsStep(true);
+                }
+
+                // Countdown timer allaqachon useEffect orqali ishlaydi
             } else {
                 setError(data.message || 'SMS joʻnatishda xato yuz berdi');
             }
@@ -205,7 +235,13 @@ const Registration = () => {
     };
 
     const onSubmitPersonalData = async (data) => {
+        // Form allaqachon yuborilmoqda bo'lsa, to'xtatish
+        if (isSubmitting) {
+            return;
+        }
+
         setError('');
+        setIsSubmitting(true);
         setIsLoading(true);
 
         const cleanPhone = getCleanPhoneNumber();
@@ -213,6 +249,7 @@ const Registration = () => {
         if (cleanPhone.length !== 12) {
             setError('Toʻliq telefon raqamini kiriting (+998 XX XXX-XX-XX)');
             setIsLoading(false);
+            setIsSubmitting(false);
             return;
         }
 
@@ -223,8 +260,8 @@ const Registration = () => {
             birthdate: formatBirthDate(data.birthDate),
             gender: gender,
             phone: fullPhone,
-            role: userType, // API ga userType yuboriladi
-            userType: userType, // userType ham yuboriladi nima gap
+            role: userType,
+            userType: userType,
             serviceId: true,
             location: userLocation ? {
                 latitude: userLocation.latitude,
@@ -249,6 +286,7 @@ const Registration = () => {
             setError('Server bilan aloqa xatosi');
         } finally {
             setIsLoading(false);
+            setIsSubmitting(false);
         }
     };
 
@@ -269,7 +307,7 @@ const Registration = () => {
                 setInputBorderState('success');
                 localStorage.setItem('accessToken', data.tokens.accessToken);
                 localStorage.setItem('userLocation', JSON.stringify(userLocation));
-                localStorage.setItem('userRole', userType); // userType ni saqlaymiz
+                localStorage.setItem('userRole', userType);
                 loginWithPhone(fullPhone);
                 setTimeout(() => navigate('/dashboard'), 800);
             } else {
@@ -294,6 +332,15 @@ const Registration = () => {
         if (newCode.length === 6) handleSmsConfirm(newCode);
     };
 
+    // SMS sahifasidan orqaga qaytish
+    const handleBackFromSms = () => {
+        setIsSmsStep(false);
+        setSmsCode('');
+        setInputBorderState('default');
+        // SMS sent statusini saqlab qolamiz, lekin qayta yuborish imkonini yoqamiz
+        setCanResendSms(true);
+    };
+
     const getBorderClass = () => {
         if (inputBorderState === 'success') return 'border-green-500 bg-green-50';
         if (inputBorderState === 'error') return 'border-red-500 bg-red-50';
@@ -304,7 +351,7 @@ const Registration = () => {
 
     return (
         <div className="fixed inset-0 w-full h-full font-sans bg-gray-900">
-            {/* Background - fixed scroll bo'lmaydi */}
+            {/* Background */}
             <img
                 src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=2068&auto=format&fit=crop"
                 alt="Dental Office"
@@ -392,7 +439,7 @@ const Registration = () => {
                 </div>
             )}
 
-            {/* Main Content - ENDI scroll bor */}
+            {/* Main Content */}
             <div className="relative w-full h-full overflow-y-auto p-4 md:p-6">
                 <div className="min-h-full w-full flex items-center justify-center py-10">
 
@@ -416,7 +463,7 @@ const Registration = () => {
                         <div className="p-5 md:p-8">
                             {!isSmsStep ? (
                                 <form onSubmit={handleSubmit(onSubmitPersonalData)} className="space-y-6" ref={formRef}>
-                                    {/* Profile Image - BARCHA qurilmalarda ko'rinadi */}
+                                    {/* Profile Image */}
                                     <div className="flex flex-col items-center mb-6">
                                         <div className="relative group">
                                             <div className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-blue-100 flex items-center justify-center overflow-hidden bg-white shadow-lg">
@@ -471,7 +518,7 @@ const Registration = () => {
                                         </div>
                                     )}
 
-                                    {/* Form Grid - Kompyuterda 3ta, Planshetda 2ta, Telefonda 1ta */}
+                                    {/* Form Grid */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                         {/* Ism */}
                                         <div className="space-y-1">
@@ -483,7 +530,7 @@ const Registration = () => {
                                                         required: 'Ismni kiriting',
                                                         minLength: { value: 2, message: 'Ism kamida 2 harfdan iborat bo\'lishi kerak' }
                                                     })}
-                                                    className="w-full pl-10 pr-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all text-sm"
+                                                    className="w-full pl-10 text-black pr-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all text-sm"
                                                     placeholder="Masalan: Ali"
                                                 />
                                             </div>
@@ -500,7 +547,7 @@ const Registration = () => {
                                                         required: 'Familiyani kiriting',
                                                         minLength: { value: 2, message: 'Familiya kamida 2 harfdan iborat bo\'lishi kerak' }
                                                     })}
-                                                    className="w-full pl-10 pr-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all text-sm"
+                                                    className="w-full pl-10 text-black pr-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all text-sm"
                                                     placeholder="Masalan: Valiyev"
                                                 />
                                             </div>
@@ -517,7 +564,7 @@ const Registration = () => {
                                                     type="tel"
                                                     value={phoneNumber}
                                                     onChange={handlePhoneChange}
-                                                    className="w-full pl-10 pr-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all text-sm"
+                                                    className="w-full pl-10 text-black pr-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all text-sm"
                                                     placeholder="+998 (XX) XXX-XX-XX"
                                                     inputMode="tel"
                                                 />
@@ -525,7 +572,7 @@ const Registration = () => {
                                             <p className="text-xs text-gray-500 mt-1">+998 bilan boshlansin</p>
                                         </div>
 
-                                        {/* User Type - Planshetda full width, Desktopda bitta ustun */}
+                                        {/* User Type */}
                                         <div className="space-y-1 sm:col-span-2 lg:col-span-1" ref={dropdownRef}>
                                             <label className="text-xs font-semibold text-gray-500">Foydalanuvchi turi *</label>
                                             <div className="relative">
@@ -599,13 +646,13 @@ const Registration = () => {
                                                     })}
                                                     type="date"
                                                     max={new Date().toISOString().split('T')[0]}
-                                                    className="w-full pl-10 pr-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none text-sm"
+                                                    className="w-full text-black pl-10 pr-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none text-sm"
                                                 />
                                             </div>
                                             {errors.birthDate && <p className="text-red-500 text-xs mt-1">{errors.birthDate.message}</p>}
                                         </div>
 
-                                        {/* Manzil - Barcha ustunlarni egallaydi */}
+                                        {/* Manzil */}
                                         <div className="space-y-1 sm:col-span-2 lg:col-span-3">
                                             <label className="text-xs font-semibold text-gray-500">Manzil {userLocation?.address && '(GPS orqali aniqlangan)'}</label>
                                             <div className="relative">
@@ -614,7 +661,7 @@ const Registration = () => {
                                                     {...register('location')}
                                                     type="text"
                                                     defaultValue={userLocation?.address || ''}
-                                                    className="w-full pl-10 pr-10 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all text-sm"
+                                                    className="w-full text-black pl-10 pr-10 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all text-sm"
                                                     placeholder="Manzilingizni kiriting yoki GPS orqali aniqlang"
                                                 />
                                                 <button
@@ -657,10 +704,10 @@ const Registration = () => {
                                     <div className="pt-4">
                                         <button
                                             type="submit"
-                                            disabled={isLoading}
+                                            disabled={isLoading || isSubmitting}
                                             className="w-full py-3.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold rounded-xl shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            {isLoading ? (
+                                            {isLoading || isSubmitting ? (
                                                 <div className="flex items-center justify-center gap-2">
                                                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                                                     <span>Yuklanmoqda...</span>
@@ -676,7 +723,7 @@ const Registration = () => {
                                 <div className="space-y-6">
                                     {/* Orqaga tugmasi */}
                                     <button
-                                        onClick={() => setIsSmsStep(false)}
+                                        onClick={handleBackFromSms}
                                         className="flex items-center gap-2 text-gray-500 hover:text-blue-500 transition-colors text-sm font-medium"
                                     >
                                         <ArrowLeft className="w-4 h-4" />
@@ -727,8 +774,9 @@ const Registration = () => {
                                             </p>
                                         ) : (
                                             <button
-                                                onClick={sendSmsForRegistration}
-                                                className="text-blue-600 hover:text-blue-700 text-sm font-semibold transition-colors"
+                                                onClick={() => sendSmsForRegistration(true)}
+                                                disabled={isLoading}
+                                                className="text-blue-600 hover:text-blue-700 text-sm font-semibold transition-colors disabled:opacity-50"
                                             >
                                                 Kod kelmadimi? Qayta yuborish
                                             </button>

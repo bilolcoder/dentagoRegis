@@ -4,6 +4,7 @@ import {
     Home, FileText,   Stethoscope, Send, Users, Settings, BookOpen,
     ChevronDown, ListOrdered,Archive, User, PlusCircle, ArrowLeft
 } from 'lucide-react';
+import { HiOutlineInformationCircle } from "react-icons/hi";
 import { BsInstagram, BsTelegram } from 'react-icons/bs';
 import { FaYoutube } from "react-icons/fa";
 import { useData } from '../../context/DataProvider';
@@ -48,10 +49,12 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
 
     const navItems = [
         { icon: Home, label: t('main'), route: "/dashboard", type: "link" },
+        { icon: HiOutlineInformationCircle, label: t('my_information'), route: "/my-information", type: "link" },
+        { icon: Users, label: t('bemorlarim'), route: "/bemorlarim", type: "link" },
         { icon: ListOrdered, label: t('orders_bts'), route: "/orders", type: "link" },
         { icon: User, label: t('my_results'), route: "/result", type: "link" },
         { icon: PlusCircle, label: "Mahsulot qo'shish", route: "/addproduct", type: "link" },
-        
+
         {
             icon: Archive,
             label: t('warehouse'),

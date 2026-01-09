@@ -32,6 +32,8 @@ import TariffsContent from './components/TariffsContent';
 import Cards from './components/pages/BTS/cards';
 import Addproduct from './components/pages/addMahsulot';
 import MahsulotQoshish from './components/pages/BTS/MahsulotQAdd';
+import MyInformation from './components/MyInformayion';
+import Bemorlarim from './components/Bemorlarim';
 
 // Auth
 import Login from './components/Login';
@@ -90,6 +92,8 @@ const ProtectedLayout = () => {
     if (path === '/cards') return <Cards />;
     if (path === '/addproduct') return <Addproduct />;
     if (path === '/MahsulotQoshish') return <MahsulotQoshish />;
+    if (path === '/my-information') return <MyInformation />;
+    if (path === '/bemorlarim') return <Bemorlarim />;
 
     return <div className="text-center text-3xl mt-20 text-gray-500">404 — Sahifa topilmadi</div>;
   };
