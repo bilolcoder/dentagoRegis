@@ -166,7 +166,7 @@ function Bemorlarim() {
       }
       alert(msg);
     } finally {
-      setIsCancelling(false); // ✅ Loading tugashi
+      setIsCancelling(false); // ✅ Loading tugashi shu albatta amalga oshadi
     }
   };
 
