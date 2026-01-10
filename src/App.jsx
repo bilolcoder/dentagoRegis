@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { DataProvider, useData } from './context/DataProvider';
 
@@ -56,8 +56,11 @@ const TelegramButton = () => (
 
 // 🔐 Protected Layout (faqat autentifikatsiya qilinganlar uchun)
 const ProtectedLayout = () => {
-  const { isAuthenticated, theme } = useData();
+  const { isAuthenticated, theme, t } = useData();
   const location = useLocation();
+
+  // 🔥 SIDEBAR STATE - BU JUDA MUHIM!
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Agar login qilinmagan bo'lsa — login sahifasiga yubor
   if (!isAuthenticated) {
@@ -65,6 +68,38 @@ const ProtectedLayout = () => {
   }
 
   const path = location.pathname;
+
+  // Sahifa nomini olish
+  const getCurrentPageName = () => {
+    if (path === '/' || path === '/dashboard') return t('main') || 'Bosh sahifa';
+    if (path === "/hisobot/to'lovlar") return t('payments') || "To'lovlar";
+    if (path === '/hisobot/lead-statistika') return t('lead_statistics') || 'Lead Statistika';
+    if (path === '/hisobot/kunilik-xarajatlar') return t('daily_expenses') || 'Kunlik xarajatlar';
+    if (path === '/hisobot/kunilik-xarajatlar-kategoriyalari') return t('daily_expense_categories') || 'Xarajat kategoriyalari';
+    if (path === '/sms/shablonlar') return t('sms_templates') || 'SMS Shablonlar';
+    if (path === '/sms/sozlamalar') return t('sms_settings') || 'SMS Sozlamalari';
+    if (path === '/settings/general') return t('general_settings') || 'Umumiy sozlamalar';
+    if (path === '/manual') return t('manual') || "Qo'llanma";
+    if (path === '/storage/documents') return t('documents') || 'Hujjatlar';
+    if (path === '/storage/products' || path === '/storage') return t('products') || 'Mahsulotlar';
+    if (path === '/storage/categories') return t('categories') || 'Kategoriyalar';
+    if (path === '/storage/brands') return t('brands') || 'Brendlar';
+    if (path === '/storage/units') return t('units') || "O'lchov birliklari";
+    if (path === '/storage/suppliers') return t('suppliers') || 'Yetkazib beruvchilar';
+    if (path === '/storage/usage') return t('product_usage') || 'Mahsulot sarfi';
+    if (path === '/orders') return t('orders_bts') || 'Buyurtmalar';
+    if (path === '/profile') return t('my_profile') || 'Mening profilim';
+    if (path === '/payments/app') return t('app_payments') || "To'lovlar";
+    if (path === '/payments/tariffs') return t('tariffs') || 'Tariflar';
+    if (path === '/yetkazibberish') return 'Yetkazib berish';
+    if (path === '/result') return t('my_results') || 'Natijalarim';
+    if (path === '/cards') return 'Kartalar';
+    if (path === '/addproduct') return "Mahsulot qo'shish";
+    if (path === '/MahsulotQoshish') return "Mahsulot qo'shish";
+    if (path === '/my-information') return t('my_information') || "Ma'lumotlarim";
+    if (path === '/bemorlarim') return t('bemorlarim') || 'Bemorlarim';
+    return 'Sahifa';
+  };
 
   const renderContent = () => {
     if (path === '/' || path === '/dashboard') return <DashboardContent />;
@@ -101,9 +136,20 @@ const ProtectedLayout = () => {
   return (
     <>
       <div className={`flex h-screen overflow-hidden bg-white `}>
-        <Sidebar />
+        {/* 🔥 SIDEBAR - isSidebarOpen va setIsSidebarOpen uzatildi */}
+        <Sidebar
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+        />
+
         <main className="flex-1 overflow-y-auto">
-          <Header />
+          {/* 🔥 HEADER - isSidebarOpen, setIsSidebarOpen va currentPage uzatildi */}
+          <Header
+            isSidebarOpen={isSidebarOpen}
+            setIsSidebarOpen={setIsSidebarOpen}
+            currentPage={getCurrentPageName()}
+          />
+
           <div className="p-4 md:p-6 lg:p-8">
             {renderContent()}
           </div>

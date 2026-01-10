@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-    Home, FileText,   Stethoscope, Send, Users, Settings, BookOpen,
-    ChevronDown, ListOrdered,Archive, User, PlusCircle, ArrowLeft
+    Home, FileText, Stethoscope, Send, Users, Settings, BookOpen,
+    ChevronDown, ListOrdered, Archive, User, PlusCircle, X
 } from 'lucide-react';
 import { HiOutlineInformationCircle } from "react-icons/hi";
 import { BsInstagram, BsTelegram } from 'react-icons/bs';
@@ -28,7 +28,10 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
             window.open(route, '_blank', 'noopener,noreferrer');
         } else {
             navigate(route);
-            setIsSidebarOpen(false); // Mobil versiyada sidebarni yopish
+            // Mobil versiyada sidebarni yopish
+            if (window.innerWidth < 768) {
+                setIsSidebarOpen(false);
+            }
         }
     };
 
@@ -37,6 +40,16 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
             ...prev,
             [menuName]: !prev[menuName],
         }));
+    };
+
+    // Overlay bosilganda sidebarni yopish
+    const handleOverlayClick = () => {
+        setIsSidebarOpen(false);
+    };
+
+    // Yopish tugmasi bosilganda
+    const handleClose = () => {
+        setIsSidebarOpen(false);
     };
 
     // Sahifa yuklanganda aktiv menyuni avtomatik ochish
@@ -80,8 +93,6 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
             subItems: [
                 { label: t('payments'), route: "/hisobot/to'lovlar" },
                 { label: t('lead_statistics'), route: "/hisobot/lead-statistika" },
-                // { label: t('doc_daily_reports'), route: "/hisobot/doktor-hisobotlari" },
-                // { label: t('give_money_docs'), route: "/hisobot/doktorlarga-pul-berish" },
                 { label: t('daily_expenses'), route: "/hisobot/kunilik-xarajatlar" },
                 { label: t('daily_expense_categories'), route: "/hisobot/kunilik-xarajatlar-kategoriyalari" },
             ]
@@ -105,16 +116,11 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
             name: "settings",
             subItems: [
                 { label: t('general_settings'), route: "/settings/general" },
-                // { label: t('lead_categories'), route: "/settings/lead-categories" },
-                // { label: t('diseases'), route: "/settings/diseases" },
-                // { label: t('ad_settings'), route: "/settings/advertising" },
-                // { label: t('announcements'), route: "/settings/announcements" },
             ]
         },
     ];
 
     const renderNavItem = (item, index) => {
-        // Bosh sahifa uchun aniq tekshiruv, guruhlar uchun startsWith tekshiruvi
         const isActive = item.route === "/"
             ? location.pathname === "/"
             : location.pathname === item.route || (item.type === "group" && location.pathname.startsWith(item.route));
@@ -190,9 +196,11 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
             {isSidebarOpen && (
                 <div
                     className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 md:hidden transition-all duration-500"
-                    onClick={() => setIsSidebarOpen(false)}
+                    onClick={handleOverlayClick}
                 ></div>
             )}
+
+            {/* Sidebar */}
             <aside className={`
                 fixed top-0 left-0 h-full bg-blue-50 z-50
                 transition-all duration-500 ease-in-out
@@ -202,12 +210,17 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
             `}>
                 <div className="flex-1 flex flex-col relative min-h-0">
                     {/* Brand Identity */}
-                    <div className="p-8 pb-6 flex bg-white items-center justify-between">
+                    <div className="p-8 pb-6 flex bg-white items-center justify-between relative">
                         <div onClick={() => handleNavigation("/")} className="cursor-pointer flex items-center justify-center gap-3 group">
                             <img className='h-37.5 -mt-18.25 mx-auto ml-[32px]' src={Logo} alt="Logo" />
                         </div>
-                        <button onClick={() => setIsSidebarOpen(false)} className="md:hidden absolute top-4 left-2 p-2 text-slate-400">
-                            <ArrowLeft size={20} />
+                        {/* Yopish tugmasi - faqat mobilda */}
+                        <button
+                            onClick={handleClose}
+                            className="md:hidden absolute top-4 right-4 p-2 text-slate-400 hover:text-[#00BCE4] hover:bg-blue-50 rounded-lg transition-all"
+                            aria-label="Yopish"
+                        >
+                            <X size={20} />
                         </button>
                     </div>
 

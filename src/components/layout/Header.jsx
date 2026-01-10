@@ -148,14 +148,20 @@ const Header = ({ setIsSidebarOpen, isSidebarOpen, currentPage }) => {
         }
     };
 
+    // MOBIL SIDEBAR OCHISH/YOPISH FUNKSIYASI
+    const handleMobileMenuToggle = () => {
+        console.log('Menu tugmasi bosildi, hozirgi holat:', isSidebarOpen);
+        setIsSidebarOpen(!isSidebarOpen);
+    };
+
     return (
         <header className="flex items-center justify-between px-3 sm:px-6 py-3 bg-white border-b border-blue-100 shadow-sm sticky top-0 z-40">
             {/* Chap qism: Menu tugmasi va Sarlavha */}
             <div className="flex items-center gap-2 sm:gap-4">
-                {/* MOBIL MENU TUGMASI – BU YERDA TO'G'RI ISHLAYDI */}
+                {/* MOBIL MENU TUGMASI */}
                 <button
-                    onClick={() => setIsSidebarOpen(prev => !prev)} // Muhim: to'g'ri toggle
-                    className="p-2.5 text-slate-600 rounded-xl hover:bg-blue-50 active:scale-95 transition-all lg:hidden"
+                    onClick={handleMobileMenuToggle}
+                    className="p-2.5 text-slate-600 rounded-xl hover:bg-blue-50 active:scale-95 transition-all md:hidden"
                     aria-label="Sidebar ochish/yopish"
                 >
                     <Menu className="w-6 h-6" />
