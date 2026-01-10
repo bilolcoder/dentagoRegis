@@ -29,7 +29,7 @@ function MyInformation() {
   // LocalStorage'dan tokenni olish
   useEffect(() => {
     const loadToken = () => {
-      const savedToken = localStorage.getItem('dentago_access_token');
+      const savedToken = localStorage.getItem('accessToken');
       setToken(savedToken);
       setIsLoading(false);
 

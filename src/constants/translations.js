@@ -7,7 +7,7 @@ export const translations = {
         calendar: "Taqvim",
         queue: "Navbat",
         my_results: "Natijalarim",
-        orders_bts: "Buyurtmalar (BTS)",
+        orders_bts: "Buyurtmalar",
         services_count: "Xizmatlar soni",
         patients_count: "Bemorlar soni",
         staff_count: "Xodimlar soni",

@@ -6,6 +6,9 @@ function Bemorlarim() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // View mode: 'card' yoki 'table'
+  const [viewMode, setViewMode] = useState('card');
+
   // Modal uchun state'lar
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [modalLoading, setModalLoading] = useState(false);
@@ -149,7 +152,6 @@ function Bemorlarim() {
               setSelectedAppointment(prev => ({ ...prev, status: 'cancelled' }));
             }
 
-            alert(`Navbat muvaffaqiyatli bekor qilindi (${endpoint.method})`);
             success = true;
             usedMethod = endpoint.method;
             break;
@@ -203,7 +205,6 @@ function Bemorlarim() {
         closeModal();
       }
 
-      alert("Navbat muvaffaqiyatli o'chirildi");
     } catch (err) {
       console.error("O'chirish xatosi:", err);
       let msg = "Navbatni o'chirib bo'lmadi";
@@ -251,7 +252,7 @@ function Bemorlarim() {
       case 'pending': return 'bg-yellow-500';
       case 'confirmed': return 'bg-blue-500';
       case 'completed': return 'bg-green-500';
-      case 'cancelled': return 'bg-red-500';
+      case 'cancelled': return 'bg-red-600';
       default: return 'bg-gray-500';
     }
   };
@@ -266,15 +267,28 @@ function Bemorlarim() {
     }
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Yuklanmoqda...</div>;
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00BCE4] mb-4"></div>
+        <p className="text-gray-600">Yuklanmoqda...</p>
+      </div>
+    </div>
+  );
+
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="bg-white p-6 rounded-lg shadow-md text-center max-w-md w-full">
-          <p className="text-red-600 mb-4">{error}</p>
+        <div className="bg-white p-8 rounded-2xl shadow-lg text-center max-w-md w-full border border-gray-100">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p className="text-red-600 mb-6 font-medium">{error}</p>
           <button
             onClick={fetchAppointments}
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+            className="bg-[#00BCE4] hover:bg-[#00a8cc] text-white px-8 py-3 rounded-xl font-medium transition-all duration-300 shadow-md hover:shadow-lg"
           >
             Qayta urinish
           </button>
@@ -284,58 +298,144 @@ function Bemorlarim() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 pb-12">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Bemorlar Navbatlari</h1>
-        <p className="text-gray-600 mt-2">Jami: {appointments.length} ta</p>
+    <div className="min-h-screen pb-5">
+      <div className="mb-8 md:mb-10">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-800">Bemorlar Navbatlari</h1>
+            <p className="text-gray-600 mt-2">Jami: {appointments.length} ta</p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* View toggle buttons */}
+            <div className="flex bg-white rounded-xl border border-gray-200 p-1">
+              <button
+                onClick={() => setViewMode('card')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                  viewMode === 'card'
+                    ? 'bg-[#00BCE4] text-white'
+                    : 'text-gray-600 hover:text-[#00BCE4]'
+                }`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                Kartalar
+              </button>
+              <button
+                onClick={() => setViewMode('table')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                  viewMode === 'table'
+                    ? 'bg-[#00BCE4] text-white'
+                    : 'text-gray-600 hover:text-[#00BCE4]'
+                }`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                Jadval
+              </button>
+            </div>
+
+            <button
+              onClick={fetchAppointments}
+              className="bg-white hover:bg-gray-50 text-[#00BCE4] border-2 border-[#00BCE4] px-4 py-2 rounded-xl font-medium transition-all duration-300 flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+              </svg>
+              Yangilash
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {appointments.map((appointment) => (
-          <div
-            key={appointment._id}
-            className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
-          >
-            <div className={`h-2 ${getStatusStyle(appointment.status)}`}></div>
+      {appointments.length === 0 ? (
+        <div className="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
+          <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-[#00BCE4]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">Navbatlar topilmadi</h3>
+          <p className="text-gray-600">Hozircha hech qanday navbat mavjud emas</p>
+        </div>
+      ) : viewMode === 'card' ? (
+        // CARD VIEW
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {appointments.map((appointment) => (
+            <div
+              key={appointment._id}
+              className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100 group"
+            >
+              <div className="p-6">
+                <div className="flex justify-between items-start mb-5">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-800 group-hover:text-[#00BCE4] transition-colors">
+                      {appointment.patient?.fullName || 'Noma\'lum bemor'}
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-1">{appointment.patient?.phone || '—'}</p>
+                  </div>
+                  <span className={`px-3 py-1.5 rounded-full text-xs font-semibold text-white ${getStatusStyle(appointment.status)}`}>
+                    {getStatusText(appointment.status)}
+                  </span>
+                </div>
 
-            <div className="p-5">
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="text-xl font-bold text-gray-800">
-                  {appointment.patient?.fullName || 'Noma\'lum bemor'}
-                </h3>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium text-white ${getStatusStyle(appointment.status)}`}>
-                  {getStatusText(appointment.status)}
-                </span>
-              </div>
+                <div className="space-y-3 text-gray-700 mb-6">
+                  <div className="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#00BCE4]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>{formatDate(appointment.appointmentDate)} • {formatTime(appointment.appointmentTime)}</span>
+                  </div>
 
-              <div className="space-y-2 text-gray-700">
-                <p>
-                  <span className="text-gray-500">Sana:</span>{' '}
-                  {formatDate(appointment.appointmentDate)} {formatTime(appointment.appointmentTime)}
-                </p>
-                <p>
-                  <span className="text-gray-500">Telefon:</span>{' '}
-                  {appointment.patient?.phone || '—'}
-                </p>
-                <p>
-                  <span className="text-gray-500">Xizmat:</span>{' '}
-                  {appointment.service || '—'}
-                </p>
-              </div>
+                  <div className="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#00BCE4]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    <span>{appointment.service || '—'}</span>
+                  </div>
+                </div>
 
-              <div className="mt-5 flex gap-3">
-                <button
-                  onClick={() => handleViewDetails(appointment)}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-4 rounded-lg transition font-medium"
-                >
-                  To'liq ko'rish
-                </button>
-
-                {appointment.status !== 'cancelled' && appointment.status !== 'completed' && (
+                <div className="flex gap-3">
                   <button
-                    onClick={() => handleCancel(appointment._id)}
-                    className="bg-orange-50 hover:bg-orange-100 text-orange-600 p-2.5 rounded-lg transition flex items-center justify-center w-11 h-11"
-                    title="Bekor qilish"
+                    onClick={() => handleViewDetails(appointment)}
+                    className="flex-1 bg-[#00BCE4] hover:bg-[#00a8cc] text-white py-3 px-4 rounded-xl font-medium transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    To'liq ko'rish
+                  </button>
+
+                  {appointment.status !== 'cancelled' && appointment.status !== 'completed' && (
+                    <button
+                      onClick={() => handleCancel(appointment._id)}
+                      className="bg-red-50 hover:bg-red-100 text-red-600 p-3 rounded-xl transition-all duration-300 flex items-center justify-center w-12 h-12"
+                      title="Bekor qilish"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => handleDelete(appointment._id)}
+                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-3 rounded-xl transition-all duration-300 flex items-center justify-center w-12 h-12"
+                    title="O'chirish"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -348,139 +448,276 @@ function Bemorlarim() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                       />
                     </svg>
                   </button>
-                )}
-
-                <button
-                  onClick={() => handleDelete(appointment._id)}
-                  className="bg-red-50 hover:bg-red-100 text-red-600 p-2.5 rounded-lg transition flex items-center justify-center w-11 h-11"
-                  title="O'chirish"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                    />
-                  </svg>
-                </button>
+                </div>
               </div>
             </div>
+          ))}
+        </div>
+      ) : (
+        // TABLE VIEW
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Bemor
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Telefon
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Sana & Vaqt
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Xizmat
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Holati
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Harakatlar
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-100">
+                {appointments.map((appointment) => (
+                  <tr key={appointment._id} className="hover:bg-gray-50 transition-colors duration-200">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-10 w-10 bg-blue-50 rounded-full flex items-center justify-center">
+                          <span className="text-[#00BCE4] font-semibold">
+                            {appointment.patient?.fullName?.charAt(0) || 'N'}
+                          </span>
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">
+                            {appointment.patient?.fullName || 'Noma\'lum bemor'}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{appointment.patient?.phone || '—'}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{formatDate(appointment.appointmentDate)}</div>
+                      <div className="text-sm text-gray-500">{formatTime(appointment.appointmentTime)}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{appointment.service || '—'}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full text-white ${getStatusStyle(appointment.status)}`}>
+                        {getStatusText(appointment.status)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleViewDetails(appointment)}
+                          className="text-[#00BCE4] hover:text-[#00a8cc] bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-all duration-300"
+                          title="To'liq ko'rish"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        </button>
+
+                        {appointment.status !== 'cancelled' && appointment.status !== 'completed' && (
+                          <button
+                            onClick={() => handleCancel(appointment._id)}
+                            className="text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-all duration-300"
+                            title="Bekor qilish"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+
+                        <button
+                          onClick={() => handleDelete(appointment._id)}
+                          className="text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 p-2 rounded-lg transition-all duration-300"
+                          title="O'chirish"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        ))}
-      </div>
+
+          {/* <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-700">
+                Jami <span className="font-semibold">{appointments.length}</span> ta navbat
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-700">
+                <span className="flex items-center">
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full mr-1"></div>
+                  Kutilmoqda
+                </span>
+                <span className="flex items-center">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full mr-1"></div>
+                  Tasdiqlangan
+                </span>
+                <span className="flex items-center">
+                  <div className="w-3 h-3 bg-green-500 rounded-full mr-1"></div>
+                  Bajarildi
+                </span>
+                <span className="flex items-center">
+                  <div className="w-3 h-3 bg-red-600 rounded-full mr-1"></div>
+                  Bekor qilingan
+                </span>
+              </div>
+            </div>
+          </div> */}
+        </div>
+      )}
 
       {/* ================= MODAL ================= */}
       {(selectedAppointment || modalLoading || modalError) && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white p-5 border-b flex justify-between items-center">
+        <div className="fixed inset-0 bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-fadeIn">
+            <div className="sticky top-0 bg-white p-6 border-b border-gray-200 flex justify-between items-center z-10">
               <h2 className="text-2xl font-bold text-gray-800">To'liq ma'lumot</h2>
               <button
                 onClick={closeModal}
-                className="text-gray-500 hover:text-gray-800 text-2xl font-bold"
+                className="text-gray-400 hover:text-gray-800 hover:bg-gray-100 p-2 rounded-full transition-all duration-300"
               >
-                ×
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
 
             <div className="p-6">
               {modalLoading ? (
-                <div className="text-center py-10">
-                  <div className="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
-                  <p className="mt-4 text-gray-600">Yuklanmoqda...</p>
+                <div className="text-center py-12">
+                  <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00BCE4] mb-4"></div>
+                  <p className="text-gray-600 font-medium">Yuklanmoqda...</p>
                 </div>
               ) : modalError ? (
-                <p className="text-red-600 text-center py-8">{modalError}</p>
+                <div className="text-center py-10">
+                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <p className="text-red-600 font-medium">{modalError}</p>
+                </div>
               ) : selectedAppointment ? (
-                <div className="space-y-5">
+                <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <p className="text-gray-500 mb-1">Bemor</p>
-                      <p className="font-medium">{selectedAppointment.patient?.fullName || '—'}</p>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Telefon: {selectedAppointment.patient?.phone || '—'}
+                    <div className="bg-blue-50 p-5 rounded-xl">
+                      <p className="text-gray-500 text-sm mb-1">Bemor</p>
+                      <p className="font-bold text-lg text-gray-800">{selectedAppointment.patient?.fullName || '—'}</p>
+                      <p className="text-gray-600 mt-2">
+                        <span className="font-medium">Telefon:</span> {selectedAppointment.patient?.phone || '—'}
                       </p>
                     </div>
 
-                    <div>
-                      <p className="text-gray-500 mb-1">Holati</p>
-                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium text-white ${getStatusStyle(selectedAppointment.status)}`}>
+                    <div className="bg-blue-50 p-5 rounded-xl">
+                      <p className="text-gray-500 text-sm mb-1">Holati</p>
+                      <span className={`inline-block px-4 py-2 rounded-full font-semibold text-white ${getStatusStyle(selectedAppointment.status)}`}>
                         {getStatusText(selectedAppointment.status)}
                       </span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <p className="text-gray-500 mb-1">Sana va vaqt</p>
-                      <p className="font-medium">
+                    <div className="bg-gray-50 p-5 rounded-xl">
+                      <p className="text-gray-500 text-sm mb-1">Sana va vaqt</p>
+                      <p className="font-medium text-lg">
                         {formatDate(selectedAppointment.appointmentDate)} • {formatTime(selectedAppointment.appointmentTime)}
                       </p>
                     </div>
 
-                    <div>
-                      <p className="text-gray-500 mb-1">Xizmat turi</p>
-                      <p className="font-medium">{selectedAppointment.service || '—'}</p>
+                    <div className="bg-gray-50 p-5 rounded-xl">
+                      <p className="text-gray-500 text-sm mb-1">Xizmat turi</p>
+                      <p className="font-medium text-lg">{selectedAppointment.service || '—'}</p>
                     </div>
                   </div>
 
                   {selectedAppointment.doctor && (
-                    <div className="pt-4 border-t">
-                      <p className="text-gray-500 mb-2">Shifokor</p>
-                      <p className="font-medium">{selectedAppointment.doctor.fullName}</p>
-                      <p className="text-sm text-gray-600">{selectedAppointment.doctor.specialty}</p>
+                    <div className="bg-gradient-to-r from-blue-50 to-white p-5 rounded-xl border border-blue-100">
+                      <p className="text-gray-500 text-sm mb-2">Shifokor</p>
+                      <p className="font-bold text-lg text-gray-800">{selectedAppointment.doctor.fullName}</p>
+                      <p className="text-[#00BCE4] font-medium mt-1">{selectedAppointment.doctor.specialty}</p>
                     </div>
                   )}
 
                   {selectedAppointment.comment && (
-                    <div className="pt-4 border-t">
-                      <p className="text-gray-500 mb-2">Izoh</p>
-                      <p className="text-gray-700 whitespace-pre-wrap">{selectedAppointment.comment}</p>
+                    <div className="bg-white border border-gray-200 p-5 rounded-xl">
+                      <p className="text-gray-500 text-sm mb-2">Izoh</p>
+                      <p className="text-gray-700 whitespace-pre-wrap bg-gray-50 p-4 rounded-lg">{selectedAppointment.comment}</p>
                     </div>
                   )}
 
                   {selectedAppointment.doctor?.clinic && (
-                    <div className="pt-4 border-t">
-                      <p className="text-gray-500 mb-2">Klinika</p>
-                      <p className="font-medium">{selectedAppointment.doctor.clinic.name}</p>
-                      <p className="text-sm text-gray-600">{selectedAppointment.doctor.clinic.address}</p>
+                    <div className="bg-white border border-gray-200 p-5 rounded-xl">
+                      <p className="text-gray-500 text-sm mb-2">Klinika</p>
+                      <p className="font-bold text-gray-800">{selectedAppointment.doctor.clinic.name}</p>
+                      <p className="text-gray-600 mt-1">{selectedAppointment.doctor.clinic.address}</p>
                     </div>
                   )}
 
-                  {/* Modal ichida bekor qilish tugmasi */}
-                  {selectedAppointment.status !== 'cancelled' && selectedAppointment.status !== 'completed' && (
-                    <div className="pt-6 border-t flex gap-3">
+                  {/* Modal ichida bekor qilish va o'chirish tugmalari */}
+                  <div className="pt-6 border-t border-gray-200 flex gap-4">
+                    {selectedAppointment.status !== 'cancelled' && selectedAppointment.status !== 'completed' && (
                       <button
                         onClick={() => handleCancel(selectedAppointment._id)}
-                        className="bg-orange-600 hover:bg-orange-700 text-white py-3 px-6 rounded-lg transition font-medium flex-1"
+                        className="flex-1 bg-red-600 hover:bg-red-700 text-white py-4 px-6 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                       >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                         Bekor qilish
                       </button>
-                      <button
-                        onClick={() => handleDelete(selectedAppointment._id)}
-                        className="bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded-lg transition font-medium flex-1"
-                      >
-                        O'chirish
-                      </button>
-                    </div>
-                  )}
+                    )}
+                    <button
+                      onClick={() => handleDelete(selectedAppointment._id)}
+                      className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-4 px-6 rounded-xl font-semibold transition-all duration-300 shadow hover:shadow-lg flex items-center justify-center gap-2"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      O'chirish
+                    </button>
+                  </div>
                 </div>
               ) : null}
             </div>
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 }
