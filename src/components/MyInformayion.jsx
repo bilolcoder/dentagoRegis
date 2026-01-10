@@ -45,9 +45,10 @@ function MyInformation() {
     }
   }, []);
 
-  const { register, handleSubmit, reset, formState: { errors }, watch } = useForm({
+  const { register, handleSubmit, reset, formState: { errors } } = useForm({
     defaultValues: {
       fullName: '',
+      gender: 'male',
       specialty: 'Terapevt',
       experienceYears: 5,
       patientsCount: 100,
@@ -95,7 +96,7 @@ function MyInformation() {
       // Rasm yuklash
       if (selectedFile) {
         const formData = new FormData();
-        formData.append('image', selectedFile);  // ← Backend "image" kalitini kutadi
+        formData.append('image', selectedFile);
 
         const uploadRes = await axios.post(
           'https://app.dentago.uz/api/upload/image',
@@ -108,8 +109,6 @@ function MyInformation() {
           }
         );
 
-        console.log('Upload javobi:', uploadRes.data); // ← Debug uchun
-
         let filename =
           uploadRes.data?.file?.savedName ||
           uploadRes.data?.filename ||
@@ -117,14 +116,13 @@ function MyInformation() {
 
         if (filename) {
           avatarUrl = `https://app.dentago.uz/images/${filename}`;
-        } else {
-          console.warn('Fayl nomi topilmadi → default avatar');
         }
       }
 
-      // To‘liq tozalangan va to‘g‘ri formatdagi ma'lumot
+      // To‘liq tozalangan ma'lumot
       const doctorData = {
         fullName: data.fullName.trim() || 'Noma\'lum Shifokor',
+        gender: data.gender,                    // ← YANGI
         specialty: data.specialty || 'Terapevt',
         experienceYears: Number(data.experienceYears) || 0,
         patientsCount: Number(data.patientsCount) || 0,
@@ -153,8 +151,6 @@ function MyInformation() {
         isAvailable24x7: !!data.isAvailable24x7,
         isActive: !!data.isActive
       };
-
-      console.log('Yuborilayotgan doctor data:', doctorData); // ← Debug
 
       const response = await axios.post(
         'https://app.dentago.uz/api/admin/doctors',
@@ -203,10 +199,12 @@ function MyInformation() {
 
   const specialties = [
     'Terapevt',
+    'Ortoped',
+    'Ayol shifokor',
+    'Bolalar stomatologi',
     'Хирург',
     'Ортодонт',
     'Пародонтолог',
-    'Педиатр',
     'Имплантолог',
     'Гигиенист',
     'Эндодонт',
@@ -225,27 +223,15 @@ function MyInformation() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-gray-50 p-4 md:p-6">
       <div className="max-w-4xl mx-auto">
-        {/* Sarlavha */}
         <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#00BCE4] to-[#0099CC] mb-4">
-            <BriefcaseMedical className="w-8 h-8 text-white" />
-          </div>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-800">
             Shifokor Qo'shish
           </h1>
           <p className="text-gray-600 mt-2">
             Yangi shifokor ma'lumotlarini kiritish uchun formani to'ldiring
           </p>
-
-          <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100">
-            <div className={`w-3 h-3 rounded-full ${token ? 'bg-green-500' : 'bg-red-500'}`}></div>
-            <span className="text-sm font-medium">
-              {token ? 'Token mavjud' : 'Token topilmadi'}
-            </span>
-          </div>
         </div>
 
-        {/* Xabarlar */}
         {submitMessage.text && (
           <div className={`mb-6 p-4 rounded-lg ${
             submitMessage.type === 'success'
@@ -256,7 +242,6 @@ function MyInformation() {
           </div>
         )}
 
-        {/* Token yo'q bo'lsa */}
         {!token ? (
           <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
             <h3 className="text-2xl font-bold mb-4 text-red-600">Access Token Topilmadi</h3>
@@ -324,6 +309,37 @@ function MyInformation() {
                   )}
                 </div>
 
+                {/* Jins */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <Users className="w-4 h-4" /> Jins *
+                  </label>
+                  <div className="flex gap-8">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        value="male"
+                        {...register('gender', { required: 'Jinsni tanlang' })}
+                        className="w-5 h-5 text-[#00BCE4]"
+                      />
+                      <span>Erkak</span>
+                    </label>
+
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        value="female"
+                        {...register('gender', { required: 'Jinsni tanlang' })}
+                        className="w-5 h-5 text-[#00BCE4]"
+                      />
+                      <span>Ayol</span>
+                    </label>
+                  </div>
+                  {errors.gender && (
+                    <p className="mt-1 text-sm text-red-600">{errors.gender.message}</p>
+                  )}
+                </div>
+
                 {/* Telefon + Email */}
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
@@ -372,15 +388,19 @@ function MyInformation() {
                     Mutaxassislik *
                   </label>
                   <select
-                    {...register('specialty', { required: true })}
+                    {...register('specialty', { required: 'Mutaxassislikni tanlang' })}
                     className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00BCE4] outline-none transition"
                   >
+                    <option value="">Tanlang...</option>
                     {specialties.map((spec) => (
                       <option key={spec} value={spec}>
                         {spec}
                       </option>
                     ))}
                   </select>
+                  {errors.specialty && (
+                    <p className="mt-1 text-sm text-red-600">{errors.specialty.message}</p>
+                  )}
                 </div>
 
                 {/* Tavsif */}
