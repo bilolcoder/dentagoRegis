@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
 import {
@@ -26,25 +26,26 @@ function MyInformation() {
   const [token, setToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // LocalStorage'dan tokenni olish
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+
+  const fileInputRef = useRef(null);
+
+  // Token yuklash
   useEffect(() => {
-    const loadToken = () => {
-      const savedToken = localStorage.getItem('accessToken');
-      setToken(savedToken);
-      setIsLoading(false);
+    const savedToken = localStorage.getItem('accessToken');
+    setToken(savedToken);
+    setIsLoading(false);
 
-      if (!savedToken) {
-        setSubmitMessage({
-          type: 'error',
-          text: '❌ Access token topilmadi. Tokenni localStoragega "dentago_access_token" keyi ostida saqlang.'
-        });
-      }
-    };
-
-    loadToken();
+    if (!savedToken) {
+      setSubmitMessage({
+        type: 'error',
+        text: '❌ Access token topilmadi. localStorage.setItem("accessToken", "YOUR_TOKEN") qilib sinab ko‘ring'
+      });
+    }
   }, []);
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm({
+  const { register, handleSubmit, reset, formState: { errors }, watch } = useForm({
     defaultValues: {
       fullName: '',
       specialty: 'Terapevt',
@@ -62,15 +63,26 @@ function MyInformation() {
       phone: '',
       email: '',
       description: ''
-    }
+    },
+    mode: 'onChange'
   });
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Faqat rasm fayllarini tanlashingiz mumkin!');
+      return;
+    }
+
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
 
   const onSubmit = async (data) => {
     if (!token) {
-      setSubmitMessage({
-        type: 'error',
-        text: '❌ Access token mavjud emas. Tokenni localStoragega "dentago_access_token" keyi ostida saqlang.'
-      });
+      setSubmitMessage({ type: 'error', text: '❌ Token mavjud emas!' });
       return;
     }
 
@@ -78,73 +90,112 @@ function MyInformation() {
     setSubmitMessage({ type: '', text: '' });
 
     try {
+      let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.fullName || 'Doctor')}&background=00BCE4&color=fff`;
+
+      // Rasm yuklash
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append('image', selectedFile);  // ← Backend "image" kalitini kutadi
+
+        const uploadRes = await axios.post(
+          'https://app.dentago.uz/api/upload/image',
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+
+        console.log('Upload javobi:', uploadRes.data); // ← Debug uchun
+
+        let filename =
+          uploadRes.data?.file?.savedName ||
+          uploadRes.data?.filename ||
+          (uploadRes.data?.url ? uploadRes.data.url.split('/').pop() : null);
+
+        if (filename) {
+          avatarUrl = `https://app.dentago.uz/images/${filename}`;
+        } else {
+          console.warn('Fayl nomi topilmadi → default avatar');
+        }
+      }
+
+      // To‘liq tozalangan va to‘g‘ri formatdagi ma'lumot
       const doctorData = {
-        fullName: data.fullName,
-        specialty: data.specialty,
-        experienceYears: parseInt(data.experienceYears),
-        patientsCount: parseInt(data.patientsCount),
-        price: parseInt(data.price),
-        rating: parseFloat(data.rating),
-        reviewsCount: parseInt(data.reviewsCount),
+        fullName: data.fullName.trim() || 'Noma\'lum Shifokor',
+        specialty: data.specialty || 'Terapevt',
+        experienceYears: Number(data.experienceYears) || 0,
+        patientsCount: Number(data.patientsCount) || 0,
+        price: Number(data.price) || 0,
+        rating: Number(data.rating) || 0,
+        reviewsCount: Number(data.reviewsCount) || 0,
         clinic: {
-          name: data.clinicName,
-          address: data.clinicAddress,
-          location: {
-            lat: 41.3111,
-            lng: 69.2797
-          },
+          name: data.clinicName.trim() || 'Noma\'lum Klinika',
+          address: data.clinicAddress.trim() || 'Manzil kiritilmagan',
+          location: { lat: 41.3111, lng: 69.2797 },
           distanceKm: 2.5
         },
         workTime: {
-          start: data.workTimeStart,
-          end: data.workTimeEnd
+          start: data.workTimeStart || '09:00',
+          end: data.workTimeEnd || '18:00'
         },
         subscription: {
           startAt: new Date().toISOString(),
           endAt: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
           isActive: true
         },
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.fullName)}&background=00BCE4&color=fff`,
-        phone: data.phone,
-        email: data.email,
-        description: data.description,
-        isAvailable24x7: data.isAvailable24x7,
-        isActive: data.isActive
+        avatar: avatarUrl,
+        phone: data.phone.trim() || '',
+        email: data.email.trim() || '',
+        description: data.description.trim() || '',
+        isAvailable24x7: !!data.isAvailable24x7,
+        isActive: !!data.isActive
       };
 
-      const response = await axios.post('https://app.dentago.uz/api/admin/doctors', doctorData, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+      console.log('Yuborilayotgan doctor data:', doctorData); // ← Debug
+
+      const response = await axios.post(
+        'https://app.dentago.uz/api/admin/doctors',
+        doctorData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
         }
-      });
+      );
 
       if (response.status === 200 || response.status === 201) {
         reset();
+        setSelectedFile(null);
+        setPreviewUrl(null);
         setSubmitMessage({
           type: 'success',
-          text: '✅ Shifokor muvaffaqiyatli qo\'shildi!'
+          text: '✅ Shifokor va rasm muvaffaqiyatli qo‘shildi!'
         });
       }
     } catch (err) {
-      console.error('Submit error:', err);
+      console.error('Xato:', err);
 
-      if (err.response?.status === 401) {
-        setSubmitMessage({
-          type: 'error',
-          text: '❌ Token noto\'g\'ri yoki muddati o\'tgan. Tokenni yangilang.'
-        });
+      let msg = 'Xatolik yuz berdi';
+
+      if (err.response) {
+        if (err.response.status === 400) {
+          msg = '❌ 400 Bad Request: ' + (err.response.data?.message || 'Maydonlar noto‘g‘ri yoki yetishmayapti');
+        } else if (err.response.status === 401) {
+          msg = '❌ Token noto‘g‘ri yoki muddati o‘tgan';
+        } else if (err.response.status === 409) {
+          msg = '❌ Bu ma‘lumot allaqachon mavjud';
+        } else {
+          msg = `❌ Server xatosi: ${err.response.status}`;
+        }
       } else if (err.code === 'ERR_NETWORK') {
-        setSubmitMessage({
-          type: 'error',
-          text: '❌ Server bilan bog\'lanishda muammo. Internet aloqasini tekshiring.'
-        });
-      } else {
-        setSubmitMessage({
-          type: 'error',
-          text: `❌ Xatolik: ${err.response?.data?.message || err.message}`
-        });
+        msg = '❌ Internet aloqasi uzildi';
       }
+
+      setSubmitMessage({ type: 'error', text: msg });
     } finally {
       setIsSubmitting(false);
     }
@@ -165,18 +216,16 @@ function MyInformation() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen text-black bg-gradient-to-br from-white to-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-[#00BCE4] mx-auto mb-4" />
-          <p className="text-gray-600">Yuklanmoqda...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-gray-50">
+        <Loader2 className="w-12 h-12 animate-spin text-[#00BCE4]" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen text-black bg-gradient-to-br from-white to-gray-50 p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-white to-gray-50 p-4 md:p-6">
       <div className="max-w-4xl mx-auto">
+        {/* Sarlavha */}
         <div className="mb-8 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#00BCE4] to-[#0099CC] mb-4">
             <BriefcaseMedical className="w-8 h-8 text-white" />
@@ -184,8 +233,8 @@ function MyInformation() {
           <h1 className="text-3xl md:text-4xl font-bold text-gray-800">
             Shifokor Qo'shish
           </h1>
-          <p className="text-gray-600 mt-2 max-w-2xl mx-auto">
-            Yangi shifokor ma'lumotlarini kiritish uchun quyidagi formani to'ldiring
+          <p className="text-gray-600 mt-2">
+            Yangi shifokor ma'lumotlarini kiritish uchun formani to'ldiring
           </p>
 
           <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100">
@@ -193,335 +242,324 @@ function MyInformation() {
             <span className="text-sm font-medium">
               {token ? 'Token mavjud' : 'Token topilmadi'}
             </span>
-            <Key className="w-4 h-4 text-gray-500" />
           </div>
         </div>
 
+        {/* Xabarlar */}
         {submitMessage.text && (
-          <div className={`mb-6 p-4 rounded-lg ${submitMessage.type === 'success' ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'}`}>
-            <div className="flex items-center gap-3">
-              {submitMessage.type === 'success' ? (
-                <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
-                  <span className="text-green-600 text-sm">✓</span>
-                </div>
-              ) : (
-                <AlertCircle className="w-5 h-5" />
-              )}
-              <span>{submitMessage.text}</span>
-            </div>
+          <div className={`mb-6 p-4 rounded-lg ${
+            submitMessage.type === 'success'
+              ? 'bg-green-50 border border-green-200 text-green-700'
+              : 'bg-red-50 border border-red-200 text-red-700'
+          }`}>
+            {submitMessage.text}
           </div>
         )}
 
+        {/* Token yo'q bo'lsa */}
         {!token ? (
-          <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-            <div className="text-center">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-red-100 to-red-50 flex items-center justify-center">
-                <Key className="w-10 h-10 text-red-400" />
-              </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-3">
-                Access Token Topilmadi
-              </h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                Shifokor qo'shish uchun access token kerak.
-              </p>
-
-              <div className="bg-gray-50 p-4 rounded-lg mb-6 text-left">
-                <h4 className="font-medium text-gray-700 mb-2">Token qo'yish yo'riqnomasi:</h4>
-                <ol className="list-decimal pl-5 space-y-2 text-sm text-gray-600">
-                  <li>Browserning Developer Tools'ini oching (F12)</li>
-                  <li>Console yoki Application bo'limiga o'ting</li>
-                  <li>Quyidagi kodni kiriting:</li>
-                </ol>
-                <div className="mt-3 p-3 bg-gray-800 text-gray-100 rounded-lg font-mono text-sm">
-                  localStorage.setItem('dentago_access_token', 'SIZNING_TOKENIZ');
-                </div>
-                <p className="mt-3 text-sm text-gray-500">
-                  Tokenni admin panel orqali oling va yuqoridagi kodda 'SIZNING_TOKENIZ' o'rniga qo'ying.
-                </p>
-              </div>
-
-              <p className="text-sm text-gray-500">
-                Tokenni qo'yganingizdan keyin sahifani yangilang (F5)
-              </p>
+          <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+            <h3 className="text-2xl font-bold mb-4 text-red-600">Access Token Topilmadi</h3>
+            <p className="mb-4">
+              Iltimos, brauzer konsolida quyidagi kodni bajaring:
+            </p>
+            <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm mb-4">
+              localStorage.setItem('accessToken', 'SIZNING_TOKENINGIZ')
             </div>
+            <p className="text-gray-600">Keyin sahifani yangilang (F5)</p>
           </div>
         ) : (
           <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-gray-100">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {/* Rasm yuklash */}
+              <div className="flex flex-col items-center mb-8">
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-32 h-32 rounded-[10px] overflow-hidden bg-gray-200 cursor-pointer hover:opacity-90 transition border-2 border-[#00BCE4] relative shadow-md"
+                >
+                  {previewUrl ? (
+                    <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
+                      <BriefcaseMedical className="w-10 h-10 mb-1" />
+                      <span className="text-xs">Rasm yuklash</span>
+                    </div>
+                  )}
+                </div>
+                <p className="mt-3 text-sm text-gray-600">
+                  {selectedFile ? selectedFile.name : 'klinika rasmini tanlang'}
+                </p>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+              </div>
 
+              {/* Asosiy ma'lumotlar */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-gray-700 text-lg border-l-4 border-[#00BCE4] pl-3">Asosiy Ma'lumotlar</h3>
+                <h3 className="font-semibold text-lg border-l-4 border-[#00BCE4] pl-3">
+                  Asosiy Ma'lumotlar
+                </h3>
 
+                {/* Ism */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-                    <UserCircle className="w-4 h-4" />
-                    To'liq Ismi *
+                  <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                    <UserCircle className="w-4 h-4" /> To'liq Ismi *
                   </label>
                   <input
-                    {...register("fullName", {
-                      required: "Ism kiritilishi shart",
-                      minLength: { value: 3, message: "Kamida 3 ta harf bo'lishi kerak" }
+                    {...register('fullName', {
+                      required: 'Ism majburiy',
+                      minLength: { value: 3, message: 'Kamida 3 ta belgi' }
                     })}
-                    className={`w-full px-4 py-3 rounded-xl border ${errors.fullName ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-gray-50'} focus:ring-2 focus:ring-[#00BCE4] focus:border-[#00BCE4] outline-none transition placeholder-gray-400`}
+                    className={`w-full px-4 py-3 rounded-xl border ${
+                      errors.fullName ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                    } focus:ring-2 focus:ring-[#00BCE4] outline-none transition`}
                     placeholder="Aliyev Ali Aliyevich"
                   />
                   {errors.fullName && (
-                    <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="w-3.5 h-3.5" />
-                      {errors.fullName.message}
-                    </p>
+                    <p className="mt-1 text-sm text-red-600">{errors.fullName.message}</p>
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Telefon + Email */}
+                <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-                      <Phone className="w-4 h-4" />
-                      Telefon *
+                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                      <Phone className="w-4 h-4" /> Telefon *
                     </label>
                     <input
-                      {...register("phone", {
-                        required: "Telefon raqam kiritilishi shart",
+                      {...register('phone', {
+                        required: 'Telefon raqami majburiy',
                         pattern: {
-                          value: /^\+998\d{9}$/,
-                          message: "+998XXXXXXXXX formatida bo'lishi kerak"
+                          value: /^\+998[0-9]{9}$/,
+                          message: '+998XXXXXXXXX formatida kiriting'
                         }
                       })}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-[#00BCE4] focus:border-[#00BCE4] outline-none transition placeholder-gray-400"
-                      placeholder="+998 90 123 45 67"
+                      className={`w-full px-4 py-3 rounded-xl border ${
+                        errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                      } focus:ring-2 focus:ring-[#00BCE4] outline-none transition`}
+                      placeholder="+998901234567"
                     />
+                    {errors.phone && (
+                      <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-                      <Mail className="w-4 h-4" />
-                      Email
+                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                      <Mail className="w-4 h-4" /> Email
                     </label>
                     <input
-                      {...register("email", {
+                      type="email"
+                      {...register('email', {
                         pattern: {
                           value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                          message: "Noto'g'ri email formati"
+                          message: 'Noto‘g‘ri email formati'
                         }
                       })}
-                      type="email"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-[#00BCE4] focus:border-[#00BCE4] outline-none transition placeholder-gray-400"
-                      placeholder="ali@example.com"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00BCE4] outline-none transition"
+                      placeholder="example@gmail.com"
                     />
                   </div>
                 </div>
 
+                {/* Mutaxassislik */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Mutaxassislik *
                   </label>
                   <select
-                    {...register("specialty", { required: true })}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-[#00BCE4] focus:border-[#00BCE4] outline-none transition appearance-none"
+                    {...register('specialty', { required: true })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00BCE4] outline-none transition"
                   >
                     {specialties.map((spec) => (
-                      <option key={spec} value={spec}>{spec}</option>
+                      <option key={spec} value={spec}>
+                        {spec}
+                      </option>
                     ))}
                   </select>
                 </div>
 
+                {/* Tavsif */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Tavsif
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tavsif</label>
                   <textarea
-                    {...register("description")}
-                    rows="3"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-[#00BCE4] focus:border-[#00BCE4] outline-none transition placeholder-gray-400 resize-none"
+                    {...register('description')}
+                    rows={3}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00BCE4] outline-none transition resize-none"
                     placeholder="Shifokor haqida qisqacha ma'lumot..."
                   />
                 </div>
               </div>
 
+              {/* Tajriba */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-gray-700 text-lg border-l-4 border-[#00BCE4] pl-3">Tajriba</h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h3 className="font-semibold text-lg border-l-4 border-[#00BCE4] pl-3">Tajriba</h3>
+                <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      Tajriba (yil) *
+                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                      <Calendar className="w-4 h-4" /> Tajriba (yil) *
                     </label>
                     <input
-                      {...register("experienceYears", {
-                        required: "Tajriba yilini kiriting",
-                        min: { value: 0, message: "Musbat son kiriting" },
-                        max: { value: 60, message: "60 yildan ko'p bo'lmasin" }
-                      })}
                       type="number"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-[#00BCE4] focus:border-[#00BCE4] outline-none transition"
+                      {...register('experienceYears', {
+                        required: true,
+                        min: { value: 0, message: 'Musbat son kiriting' }
+                      })}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00BCE4] outline-none transition"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-                      <Star className="w-4 h-4" />
-                      Reyting *
+                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                      <Star className="w-4 h-4" /> Reyting *
                     </label>
                     <input
-                      {...register("rating", {
-                        required: "Reytingni kiriting",
-                        min: { value: 0, message: "0 dan kichik bo'lmasin" },
-                        max: { value: 5, message: "5 dan katta bo'lmasin" }
-                      })}
                       type="number"
                       step="0.1"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-[#00BCE4] focus:border-[#00BCE4] outline-none transition"
+                      {...register('rating', {
+                        required: true,
+                        min: 0,
+                        max: 5
+                      })}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00BCE4] outline-none transition"
                     />
                   </div>
                 </div>
               </div>
 
+              {/* Klinika */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-gray-700 text-lg border-l-4 border-[#00BCE4] pl-3">Klinika Ma'lumotlari</h3>
-
+                <h3 className="font-semibold text-lg border-l-4 border-[#00BCE4] pl-3">Klinika Ma'lumotlari</h3>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-                    <Building className="w-4 h-4" />
-                    Klinika nomi *
+                  <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                    <Building className="w-4 h-4" /> Klinika nomi *
                   </label>
                   <input
-                    {...register("clinicName", {
-                      required: "Klinika nomini kiriting",
-                      minLength: { value: 2, message: "Kamida 2 ta harf bo'lishi kerak" }
-                    })}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-[#00BCE4] focus:border-[#00BCE4] outline-none transition placeholder-gray-400"
-                    placeholder="Стоматология Премиум"
+                    {...register('clinicName', { required: 'Klinika nomi majburiy' })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00BCE4] outline-none transition"
+                    placeholder="Stomatologiya Premium"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-                    <MapPin className="w-4 h-4" />
-                    Manzil *
+                  <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                    <MapPin className="w-4 h-4" /> Manzil *
                   </label>
                   <input
-                    {...register("clinicAddress", {
-                      required: "Manzilni kiriting",
-                      minLength: { value: 5, message: "Kamida 5 ta harf bo'lishi kerak" }
-                    })}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-[#00BCE4] focus:border-[#00BCE4] outline-none transition placeholder-gray-400"
-                    placeholder="г. Ташкент, ул. Навои, д. 15"
+                    {...register('clinicAddress', { required: 'Manzil majburiy' })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00BCE4] outline-none transition"
+                    placeholder="Toshkent sh., Chilanzor tumani, 45-uy"
                   />
                 </div>
               </div>
 
+              {/* Narx va ish vaqti */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-gray-700 text-lg border-l-4 border-[#00BCE4] pl-3">Narx va Ish Vaqti</h3>
-
+                <h3 className="font-semibold text-lg border-l-4 border-[#00BCE4] pl-3">Narx va Ish Vaqti</h3>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-                    <DollarSign className="w-4 h-4" />
-                    Konsultatsiya narxi *
+                  <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                    <DollarSign className="w-4 h-4" /> Konsultatsiya narxi (so'm) *
                   </label>
                   <input
-                    {...register("price", {
-                      required: "Narxni kiriting",
-                      min: { value: 0, message: "Musbat son kiriting" }
-                    })}
                     type="number"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-[#00BCE4] focus:border-[#00BCE4] outline-none transition"
+                    {...register('price', { required: true, min: 0 })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00BCE4] outline-none transition"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
-                      Ish boshlash
+                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                      <Clock className="w-4 h-4" /> Ish boshlash
                     </label>
                     <input
-                      {...register("workTimeStart")}
                       type="time"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-[#00BCE4] focus:border-[#00BCE4] outline-none transition"
+                      {...register('workTimeStart')}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00BCE4] outline-none transition"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
-                      Ish tugash
+                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                      <Clock className="w-4 h-4" /> Ish tugash
                     </label>
                     <input
-                      {...register("workTimeEnd")}
                       type="time"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-[#00BCE4] focus:border-[#00BCE4] outline-none transition"
+                      {...register('workTimeEnd')}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00BCE4] outline-none transition"
                     />
                   </div>
                 </div>
               </div>
 
+              {/* Qo'shimcha */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-gray-700 text-lg border-l-4 border-[#00BCE4] pl-3">Qo'shimcha Ma'lumotlar</h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h3 className="font-semibold text-lg border-l-4 border-[#00BCE4] pl-3">Qo'shimcha Ma'lumotlar</h3>
+                <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-                      <Users className="w-4 h-4" />
-                      Bemorlar soni
+                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                      <Users className="w-4 h-4" /> Bemorlar soni
                     </label>
                     <input
-                      {...register("patientsCount", {
-                        min: { value: 0, message: "Musbat son kiriting" }
-                      })}
                       type="number"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-[#00BCE4] focus:border-[#00BCE4] outline-none transition"
+                      {...register('patientsCount', { min: 0 })}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00BCE4] outline-none transition"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-                      <MessageSquare className="w-4 h-4" />
-                      Sharhlar soni
+                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4" /> Sharhlar soni
                     </label>
                     <input
-                      {...register("reviewsCount", {
-                        min: { value: 0, message: "Musbat son kiriting" }
-                      })}
                       type="number"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-[#00BCE4] focus:border-[#00BCE4] outline-none transition"
+                      {...register('reviewsCount', { min: 0 })}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00BCE4] outline-none transition"
                     />
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-3">
-                  <label className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <label className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border cursor-pointer hover:bg-gray-100 transition">
                     <input
-                      {...register("isAvailable24x7")}
                       type="checkbox"
-                      className="w-5 h-5 rounded border-gray-300 text-[#00BCE4] focus:ring-[#00BCE4]"
+                      {...register('isAvailable24x7')}
+                      className="w-5 h-5 text-[#00BCE4]"
                     />
                     <div>
-                      <span className="font-medium text-gray-700">24/7 Murojat qilish mumkin</span>
-                      <p className="text-sm text-gray-500">Har qanday vaqtda konsultatsiya</p>
+                      <span className="font-medium">24/7 qabul</span>
+                      <p className="text-sm text-gray-500">Doimiy mavjud</p>
                     </div>
                   </label>
 
-                  <label className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
+                  <label className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border cursor-pointer hover:bg-gray-100 transition">
                     <input
-                      {...register("isActive")}
                       type="checkbox"
+                      {...register('isActive')}
                       defaultChecked
-                      className="w-5 h-5 rounded border-gray-300 text-[#00BCE4] focus:ring-[#00BCE4]"
+                      className="w-5 h-5 text-[#00BCE4]"
                     />
                     <div>
-                      <span className="font-medium text-gray-700">Faol</span>
-                      <p className="text-sm text-gray-500">Shifokor ishlayotgan holatda</p>
+                      <span className="font-medium">Faol</span>
+                      <p className="text-sm text-gray-500">Hozirda ishlayapti</p>
                     </div>
                   </label>
                 </div>
               </div>
 
+              {/* Submit tugmasi */}
               <div className="pt-6 border-t border-gray-200">
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-[#00BCE4] to-[#0099CC] text-white font-semibold py-3.5 px-4 rounded-xl hover:from-[#00A8D4] hover:to-[#0088B3] focus:outline-none focus:ring-2 focus:ring-[#00BCE4] focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+                  className={`w-full py-3.5 px-6 rounded-xl text-white font-semibold flex items-center justify-center gap-2 transition-all shadow-lg
+                    ${isSubmitting
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-[#00BCE4] to-[#0099CC] hover:from-[#00A8D4] hover:to-[#0088B3] hover:shadow-xl'}`}
                 >
                   {isSubmitting ? (
                     <>
@@ -537,16 +575,16 @@ function MyInformation() {
                 </button>
 
                 <p className="text-center text-sm text-gray-500 mt-4">
-                  Barcha maydonlar (*) bilan belgilanganlar majburiydir
+                  * bilan belgilangan maydonlar majburiy
                 </p>
               </div>
             </form>
           </div>
         )}
 
-        <div className="mt-8 text-center text-gray-500 text-sm">
-          <p>© {new Date().getFullYear()} Dental Clinic. Barcha huquqlar himoyalangan.</p>
-        </div>
+        <footer className="mt-8 text-center text-gray-500 text-sm">
+          © {new Date().getFullYear()} DentaGo. Barcha huquqlar himoyalangan.
+        </footer>
       </div>
     </div>
   );
