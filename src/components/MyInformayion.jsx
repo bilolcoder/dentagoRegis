@@ -25,10 +25,8 @@ function MyInformation() {
   const [submitMessage, setSubmitMessage] = useState({ type: '', text: '' });
   const [token, setToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
-
   const fileInputRef = useRef(null);
 
   // Token yuklash
@@ -122,7 +120,7 @@ function MyInformation() {
       // To‘liq tozalangan ma'lumot
       const doctorData = {
         fullName: data.fullName.trim() || 'Noma\'lum Shifokor',
-        gender: data.gender,                    // ← YANGI
+        gender: data.gender,
         specialty: data.specialty || 'Terapevt',
         experienceYears: Number(data.experienceYears) || 0,
         patientsCount: Number(data.patientsCount) || 0,
@@ -174,7 +172,6 @@ function MyInformation() {
       }
     } catch (err) {
       console.error('Xato:', err);
-
       let msg = 'Xatolik yuz berdi';
 
       if (err.response) {
@@ -182,6 +179,8 @@ function MyInformation() {
           msg = '❌ 400 Bad Request: ' + (err.response.data?.message || 'Maydonlar noto‘g‘ri yoki yetishmayapti');
         } else if (err.response.status === 401) {
           msg = '❌ Token noto‘g‘ri yoki muddati o‘tgan';
+        } else if (err.response.status === 403) {
+          msg = '❌ 403 Forbidden: Server ruxsat bermadi (CORS yoki token huquqlari muammosi bo‘lishi mumkin)';
         } else if (err.response.status === 409) {
           msg = '❌ Bu ma‘lumot allaqachon mavjud';
         } else {
@@ -324,7 +323,6 @@ function MyInformation() {
                       />
                       <span>Erkak</span>
                     </label>
-
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="radio"
