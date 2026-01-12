@@ -709,7 +709,7 @@ function MyInformation() {
           {/* Qidiruv va token holati */}
           <div className="grid md:grid-cols-2 gap-4">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3.5 top-[25px] transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Shifokor ismi, mutaxassisligi yoki klinika nomi bo'yicha qidirish..."
