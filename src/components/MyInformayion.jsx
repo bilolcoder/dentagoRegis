@@ -119,18 +119,18 @@ function MyInformation() {
     }
   };
 
-  // ID orqali shifokorni ko'rish - Tuzatildi!
+  // ID orqali shifokorni ko'rish - To'liq tuzatilgan va mustahkamlangan
   const handleViewDoctor = async (id) => {
     try {
       if (!id) {
         alert('Shifokor ID topilmadi');
+        setDebugInfo('ID topilmadi');
         return;
       }
 
       console.log('View doctor ID:', id);
       setDebugInfo(`ID orqali shifokor yuklanmoqda: ${id}`);
 
-      // TO'G'RI URL: https://app.dentago.uz/api/admin/doctors/:id
       const response = await axios.get(
         `https://app.dentago.uz/api/admin/doctors/${id}`,
         {
@@ -142,8 +142,11 @@ function MyInformation() {
 
       console.log('View doctor response:', response.data);
 
-      if (response.data) {
-        setViewDoctor(response.data);
+      // Response formatini to'g'ri qayta ishlash (agar nested bo'lsa)
+      const doctorData = response.data?.data || response.data || null;
+
+      if (doctorData) {
+        setViewDoctor(doctorData);
         setIsViewModalOpen(true);
         setDebugInfo(`Shifokor ma'lumotlari yuklandi`);
       } else {
@@ -159,7 +162,11 @@ function MyInformation() {
       if (error.response?.status === 404) {
         errorMsg = 'Shifokor topilmadi (404)';
       } else if (error.response?.status === 401) {
-        errorMsg = 'Kirish huquqi yo\'q (401)';
+        errorMsg = 'Kirish huquqi yo\'q (401) - Tokenni tekshiring';
+      } else if (error.response?.status === 403) {
+        errorMsg = 'Ruxsat yo\'q (403) - Admin huquqlarini tekshiring';
+      } else if (error.response?.status === 500) {
+        errorMsg = 'Server xatosi (500) - Backendni tekshiring';
       }
       alert(errorMsg);
     }
@@ -709,7 +716,7 @@ function MyInformation() {
           {/* Qidiruv va token holati */}
           <div className="grid md:grid-cols-2 gap-4">
             <div className="relative">
-              <Search className="absolute left-3.5 top-[25px] transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-4 top-1/3 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Shifokor ismi, mutaxassisligi yoki klinika nomi bo'yicha qidirish..."
@@ -1204,7 +1211,8 @@ function MyInformation() {
                       </label>
                       <input
                         type="number"
-                        {...register('patientsCount', { min: 0 })}
+                        {...register('patientsCount', { min: 0 })
+                        }
                         className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00BCE4] outline-none transition"
                       />
                     </div>
@@ -1215,7 +1223,8 @@ function MyInformation() {
                       </label>
                       <input
                         type="number"
-                        {...register('reviewsCount', { min: 0 })}
+                        {...register('reviewsCount', { min: 0 })
+                        }
                         className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00BCE4] outline-none transition"
                       />
                     </div>
@@ -1283,7 +1292,7 @@ function MyInformation() {
 
         {/* Shifokorni ko'rish modal oynasi */}
         {isViewModalOpen && viewDoctor && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="fixed inset-0 bg-opacity-10 flex items-center backdrop-blur-sm justify-center p-4 z-50">
             <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
                 <h2 className="text-2xl font-bold text-gray-800">Shifokor Profili</h2>
