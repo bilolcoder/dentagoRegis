@@ -683,7 +683,7 @@ function MyInformation() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white to-gray-50 p-4 md:p-6">
+    <div className="min-h-screen p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Debug info */}
         {debugInfo && (
@@ -714,9 +714,9 @@ function MyInformation() {
           </div>
 
           {/* Qidiruv va token holati */}
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-1 gap-4">
             <div className="relative">
-              <Search className="absolute left-4 top-1/3 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-4 top-[25px] transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Shifokor ismi, mutaxassisligi yoki klinika nomi bo'yicha qidirish..."
@@ -726,7 +726,7 @@ function MyInformation() {
               />
             </div>
 
-            {token ? (
+            {/* {token ? (
               <div className="bg-green-50 border border-green-200 rounded-xl p-4">
                 <div className="flex items-center gap-3 text-green-700">
                   <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
@@ -758,7 +758,7 @@ function MyInformation() {
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         </div>
 
