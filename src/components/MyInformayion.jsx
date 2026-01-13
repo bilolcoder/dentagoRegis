@@ -450,7 +450,11 @@ function MyInformation() {
       setSelectedRegion(formValues.region);
     }
     if (formValues.city) {
-      setSelectedCity(formValues.city);
+      // FormValues.city label bo'lishi mumkin, lekin biz value ni saqlashimiz kerak
+      const cityData = uzbekistanCities.find(c =>
+        c.label === formValues.city || c.value === formValues.city
+      );
+      setSelectedCity(cityData ? cityData.value : formValues.city);
     }
 
     if (doctor.avatar || doctor.profileImage || doctor.image) {
@@ -585,6 +589,9 @@ function MyInformation() {
         avatarUrl = selectedDoctor.avatar || selectedDoctor.image;
       }
 
+      // Tanlangan shahar ma'lumotlarini olish
+      const selectedCityData = uzbekistanCities.find(city => city.value === selectedCity);
+
       // TO'G'RI FORMAT: Subscription maydonlarini qo'shish
       const doctorData = {
         fullName: data.fullName?.trim() || 'Noma\'lum Shifokor',
@@ -597,7 +604,7 @@ function MyInformation() {
         reviewsCount: Number(data.reviewsCount) || 0,
         // Yangi qo'shilgan: viloyat va tuman
         region: selectedRegion,
-        city: selectedCity,
+        city: selectedCityData ? selectedCityData.label : selectedCity, // Label ni yuborish
         clinic: {
           name: data.clinicName?.trim() || 'Noma\'lum Klinika',
           address: data.clinicAddress?.trim() || 'Manzil kiritilmagan',
@@ -1305,7 +1312,7 @@ function MyInformation() {
                       >
                         <option value="">Tuman/Shaharni tanlang</option>
                         {filteredCities.map(city => (
-                          <option key={city._id} value={city.label}>
+                          <option key={city._id} value={city.value}> {/* ✅ BU YERDA O'ZGARDI: value={city.value} */}
                             {city.label}
                           </option>
                         ))}
