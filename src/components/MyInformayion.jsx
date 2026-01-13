@@ -26,8 +26,229 @@ import {
   MapPin as MapIcon,
   User,
   Plus,
-  ArrowUp
+  ArrowUp,
+  Globe
 } from 'lucide-react';
+
+const uzbekistanCities = [
+  // =========================
+  // QORAQALPOG'ISTON
+  // =========================
+  {
+    _id: "6964cadeb2a92667023e30c1",
+    label: "Nukus",
+    value: "nukus",
+    region: "Qoraqalpog'iston Respublikasi"
+  },
+  {
+    _id: "6964cadeb2a92667023e30c2",
+    label: "Xo'jayli",
+    value: "xojayli",
+    region: "Qoraqalpog'iston Respublikasi"
+  },
+  {
+    _id: "6964cadeb2a92667023e30c3",
+    label: "To'rtko'l",
+    value: "tortkol",
+    region: "Qoraqalpog'iston Respublikasi"
+  },
+  {
+    _id: "6964cadeb2a92667023e30c4",
+    label: "Beruniy",
+    value: "beruniy",
+    region: "Qoraqalpog'iston Respublikasi"
+  },
+  {
+    _id: "6964cadeb2a92667023e30c5",
+    label: "Qo'ng'irot",
+    value: "qongirot",
+    region: "Qoraqalpog'iston Respublikasi"
+  },
+
+  // =========================
+  // TOSHKENT SHAHAR
+  // =========================
+  {
+    _id: "6964cadeb2a92667023e30c6",
+    label: "Toshkent",
+    value: "toshkent",
+    region: "Toshkent shahri"
+  },
+
+  // =========================
+  // TOSHKENT VILOYATI
+  // =========================
+  {
+    _id: "6964cadeb2a92667023e30c7",
+    label: "Chirchiq",
+    value: "chirchiq",
+    region: "Toshkent viloyati"
+  },
+  {
+    _id: "6964cadeb2a92667023e30c8",
+    label: "Angren",
+    value: "angren",
+    region: "Toshkent viloyati"
+  },
+  {
+    _id: "6964cadeb2a92667023e30c9",
+    label: "Olmaliq",
+    value: "olmaliq",
+    region: "Toshkent viloyati"
+  },
+  {
+    _id: "6964cadeb2a92667023e30ca",
+    label: "Bekobod",
+    value: "bekobod",
+    region: "Toshkent viloyati"
+  },
+  {
+    _id: "6964cadeb2a92667023e30cb",
+    label: "Yangiyo'l",
+    value: "yangiyol",
+    region: "Toshkent viloyati"
+  },
+
+  // =========================
+  // SAMARQAND
+  // =========================
+  {
+    _id: "6964cadeb2a92667023e30cc",
+    label: "Samarqand",
+    value: "samarqand",
+    region: "Samarqand viloyati"
+  },
+  {
+    _id: "6964cadeb2a92667023e30cd",
+    label: "Kattaqo'rg'on",
+    value: "kattaqorgon",
+    region: "Samarqand viloyati"
+  },
+  {
+    _id: "6964cadeb2a92667023e30ce",
+    label: "Urgut",
+    value: "urgut",
+    region: "Samarqand viloyati"
+  },
+
+  // =========================
+  // BUXORO
+  // =========================
+  {
+    _id: "6964cadeb2a92667023e30cf",
+    label: "Buxoro",
+    value: "buxoro",
+    region: "Buxoro viloyati"
+  },
+  {
+    _id: "6964cadeb2a92667023e30d0",
+    label: "G'ijduvon",
+    value: "gijduvon",
+    region: "Buxoro viloyati"
+  },
+  {
+    _id: "6964cadeb2a92667023e30d1",
+    label: "Kogon",
+    value: "kogon",
+    region: "Buxoro viloyati"
+  },
+
+  // =========================
+  // FARG'ONA
+  // =========================
+  {
+    _id: "6964cadeb2a92667023e30d2",
+    label: "Farg'ona",
+    value: "fargona",
+    region: "Farg'ona viloyati"
+  },
+  {
+    _id: "6964cadeb2a92667023e30d3",
+    label: "Marg'ilon",
+    value: "margilon",
+    region: "Farg'ona viloyati"
+  },
+  {
+    _id: "6964cadeb2a92667023e30d4",
+    label: "Qo'qon",
+    value: "qoqon",
+    region: "Farg'ona viloyati"
+  },
+
+  // =========================
+  // ANDIJON
+  // =========================
+  {
+    _id: "6964cadeb2a92667023e30d5",
+    label: "Andijon",
+    value: "andijon",
+    region: "Andijon viloyati"
+  },
+  {
+    _id: "6964cadeb2a92667023e30d6",
+    label: "Asaka",
+    value: "asaka",
+    region: "Andijon viloyati"
+  },
+
+  // =========================
+  // NAMANGAN
+  // =========================
+  {
+    _id: "6964cadeb2a92667023e30d7",
+    label: "Namangan",
+    value: "namangan",
+    region: "Namangan viloyati"
+  },
+  {
+    _id: "6964cadeb2a92667023e30d8",
+    label: "Chust",
+    value: "chust",
+    region: "Namangan viloyati"
+  },
+
+  // =========================
+  // QASHQADARYO
+  // =========================
+  {
+    _id: "6964cadeb2a92667023e30d9",
+    label: "Qarshi",
+    value: "qarshi",
+    region: "Qashqadaryo viloyati"
+  },
+  {
+    _id: "6964cadeb2a92667023e30da",
+    label: "Shahrisabz",
+    value: "shahrisabz",
+    region: "Qashqadaryo viloyati"
+  },
+
+  // =========================
+  // SURXONDARYO
+  // =========================
+  {
+    _id: "6964cadeb2a92667023e30db",
+    label: "Termiz",
+    value: "termiz",
+    region: "Surxondaryo viloyati"
+  },
+
+  // =========================
+  // XORAZM
+  // =========================
+  {
+    _id: "6964cadeb2a92667023e30dc",
+    label: "Urganch",
+    value: "urganch",
+    region: "Xorazm viloyati"
+  },
+  {
+    _id: "6964cadeb2a92667023e30dd",
+    label: "Xiva",
+    value: "xiva",
+    region: "Xorazm viloyati"
+  }
+];
 
 function MyInformation() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,10 +268,22 @@ function MyInformation() {
   const [debugInfo, setDebugInfo] = useState('');
   const [isFormCollapsed, setIsFormCollapsed] = useState(false);
 
+  // Yangi state'lar - viloyat va tuman uchun
+  const [selectedRegion, setSelectedRegion] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+
   const fileInputRef = useRef(null);
   const formRef = useRef(null);
 
   const ITEMS_PER_PAGE = 6;
+
+  // Barcha unikallik viloyatlarni olish
+  const regions = [...new Set(uzbekistanCities.map(city => city.region))].sort();
+
+  // Tanlangan viloyatga qarab tuman/shaharlar
+  const filteredCities = uzbekistanCities.filter(
+    city => city.region === selectedRegion
+  );
 
   // Token yuklash
   useEffect(() => {
@@ -61,7 +294,7 @@ function MyInformation() {
     if (!savedToken) {
       setSubmitMessage({
         type: 'error',
-        text: '❌ Access token topilmadi. localStorage.setItem("accessToken", "YOUR_TOKEN") qilib sinab ko‘ring'
+        text: '❌ Access token topilmadi. localStorage.setItem("accessToken", "YOUR_TOKEN") qilib sinab ko\'ring'
       });
     }
   }, []);
@@ -119,7 +352,7 @@ function MyInformation() {
     }
   };
 
-  // ID orqali shifokorni ko'rish - To'liq tuzatilgan va mustahkamlangan
+  // ID orqali shifokorni ko'rish
   const handleViewDoctor = async (id) => {
     try {
       if (!id) {
@@ -204,11 +437,21 @@ function MyInformation() {
       isActive: doctor.isActive !== undefined ? doctor.isActive : true,
       phone: doctor.phone || doctor.phoneNumber || '',
       email: doctor.email || '',
-      description: doctor.description || doctor.bio || ''
+      description: doctor.description || doctor.bio || '',
+      region: doctor.region || '',
+      city: doctor.city || ''
     };
 
     console.log('Form values to reset:', formValues);
     reset(formValues);
+
+    // Viloyat va tumanlarni set qilish
+    if (formValues.region) {
+      setSelectedRegion(formValues.region);
+    }
+    if (formValues.city) {
+      setSelectedCity(formValues.city);
+    }
 
     if (doctor.avatar || doctor.profileImage || doctor.image) {
       setPreviewUrl(doctor.avatar || doctor.profileImage || doctor.image);
@@ -294,6 +537,11 @@ function MyInformation() {
       return;
     }
 
+    if (!selectedRegion || !selectedCity) {
+      setSubmitMessage({ type: 'error', text: '❌ Viloyat va tuman/shaharni tanlang!' });
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitMessage({ type: '', text: '' });
     setDebugInfo('Form yuborilmoqda...');
@@ -347,6 +595,9 @@ function MyInformation() {
         price: Number(data.price) || 0,
         rating: Number(data.rating) || 0,
         reviewsCount: Number(data.reviewsCount) || 0,
+        // Yangi qo'shilgan: viloyat va tuman
+        region: selectedRegion,
+        city: selectedCity,
         clinic: {
           name: data.clinicName?.trim() || 'Noma\'lum Klinika',
           address: data.clinicAddress?.trim() || 'Manzil kiritilmagan',
@@ -412,6 +663,8 @@ function MyInformation() {
         setIsEditing(false);
         setShowForm(false);
         setIsFormCollapsed(true);
+        setSelectedRegion('');
+        setSelectedCity('');
 
         // Ro'yxatni yangilash
         await fetchDoctors();
@@ -484,6 +737,8 @@ function MyInformation() {
     setPreviewUrl(null);
     setIsFormCollapsed(true);
     setSubmitMessage({ type: '', text: '' });
+    setSelectedRegion('');
+    setSelectedCity('');
   };
 
   // Yangi shifokor qo'shish tugmasi
@@ -511,10 +766,14 @@ function MyInformation() {
       isActive: true,
       phone: '',
       email: '',
-      description: ''
+      description: '',
+      region: '',
+      city: ''
     });
     setPreviewUrl(null);
     setSelectedFile(null);
+    setSelectedRegion('');
+    setSelectedCity('');
 
     // Formaga scroll qilish
     setTimeout(() => {
@@ -527,12 +786,16 @@ function MyInformation() {
     const doctorName = (doctor.fullName || doctor.name || '').toLowerCase();
     const doctorSpecialty = (doctor.specialty || doctor.specialization || '').toLowerCase();
     const clinicName = (doctor.clinic?.name || doctor.hospitalName || '').toLowerCase();
+    const doctorRegion = (doctor.region || '').toLowerCase();
+    const doctorCity = (doctor.city || '').toLowerCase();
     const search = searchTerm.toLowerCase();
 
     return (
       doctorName.includes(search) ||
       doctorSpecialty.includes(search) ||
-      clinicName.includes(search)
+      clinicName.includes(search) ||
+      doctorRegion.includes(search) ||
+      doctorCity.includes(search)
     );
   });
 
@@ -553,6 +816,8 @@ function MyInformation() {
     const rating = doctor.rating || 0;
     const reviewsCount = doctor.reviewsCount || doctor.reviews || 0;
     const avatar = doctor.avatar || doctor.profileImage || doctor.image || null;
+    const region = doctor.region || '';
+    const city = doctor.city || '';
 
     return (
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow duration-300">
@@ -603,6 +868,14 @@ function MyInformation() {
               <BriefcaseMedical className="w-4 h-4" />
               {doctorSpecialty}
             </div>
+
+            {/* Viloyat va tuman ko'rsatish */}
+            {(region || city) && (
+              <div className="flex items-center gap-2 text-gray-500 text-sm mt-1">
+                <Globe className="w-3 h-3" />
+                <span>{region}{city ? `, ${city}` : ''}</span>
+              </div>
+            )}
           </div>
 
           <div className="space-y-3 mb-6">
@@ -683,7 +956,7 @@ function MyInformation() {
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-white to-gray-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Debug info */}
         {debugInfo && (
@@ -714,19 +987,19 @@ function MyInformation() {
           </div>
 
           {/* Qidiruv va token holati */}
-          <div className="grid md:grid-cols-1 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <div className="relative">
-              <Search className="absolute left-4 top-[25px] transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-4 top-1/3 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Shifokor ismi, mutaxassisligi yoki klinika nomi bo'yicha qidirish..."
+                placeholder="Shifokor ismi, mutaxassisligi, viloyati yoki klinika nomi bo'yicha qidirish..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00BCE4] focus:border-transparent outline-none transition"
               />
             </div>
 
-            {/* {token ? (
+            {token ? (
               <div className="bg-green-50 border border-green-200 rounded-xl p-4">
                 <div className="flex items-center gap-3 text-green-700">
                   <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
@@ -758,7 +1031,7 @@ function MyInformation() {
                   </div>
                 </div>
               </div>
-            )} */}
+            )}
           </div>
         </div>
 
@@ -988,6 +1261,59 @@ function MyInformation() {
                     {errors.gender && (
                       <p className="mt-1 text-sm text-red-600">{errors.gender.message}</p>
                     )}
+                  </div>
+
+                  {/* Viloyat va Tuman */}
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                        <Globe className="w-4 h-4" /> Viloyat *
+                      </label>
+                      <select
+                        value={selectedRegion}
+                        onChange={(e) => {
+                          setSelectedRegion(e.target.value);
+                          setSelectedCity(''); // viloyat o'zgarganda tuman tozalanadi
+                        }}
+                        className={`w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00BCE4] outline-none transition`}
+                        required
+                      >
+                        <option value="">Viloyatni tanlang</option>
+                        {regions.map(region => (
+                          <option key={region} value={region}>
+                            {region}
+                          </option>
+                        ))}
+                      </select>
+                      {!selectedRegion && (
+                        <p className="mt-1 text-sm text-red-600">Viloyatni tanlang</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                        <Globe className="w-4 h-4" /> Tuman/Shahar *
+                      </label>
+                      <select
+                        value={selectedCity}
+                        onChange={(e) => setSelectedCity(e.target.value)}
+                        disabled={!selectedRegion}
+                        className={`w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00BCE4] outline-none transition ${
+                          !selectedRegion ? 'opacity-60 cursor-not-allowed' : ''
+                        }`}
+                        required
+                      >
+                        <option value="">Tuman/Shaharni tanlang</option>
+                        {filteredCities.map(city => (
+                          <option key={city._id} value={city.label}>
+                            {city.label}
+                          </option>
+                        ))}
+                      </select>
+                      {!selectedCity && selectedRegion && (
+                        <p className="mt-1 text-sm text-red-600">Tuman/Shaharni tanlang</p>
+                      )}
+                    </div>
                   </div>
 
                   {/* Telefon + Email */}
@@ -1262,9 +1588,9 @@ function MyInformation() {
                 <div className="pt-6 border-t border-gray-200">
                   <button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !selectedRegion || !selectedCity}
                     className={`w-full py-3.5 px-6 rounded-xl text-white font-semibold flex items-center justify-center gap-2 transition-all shadow-lg
-                      ${isSubmitting
+                      ${isSubmitting || !selectedRegion || !selectedCity
                         ? 'bg-gray-400 cursor-not-allowed'
                         : 'bg-gradient-to-r from-[#00BCE4] to-[#0099CC] hover:from-[#00A8D4] hover:to-[#0088B3] hover:shadow-xl'}`}
                   >
@@ -1281,6 +1607,12 @@ function MyInformation() {
                     )}
                   </button>
 
+                  {(!selectedRegion || !selectedCity) && (
+                    <p className="text-center text-sm text-red-600 mt-2">
+                      Iltimos, viloyat va tuman/shaharni tanlang!
+                    </p>
+                  )}
+
                   <p className="text-center text-sm text-gray-500 mt-4">
                     * bilan belgilangan maydonlar majburiy
                   </p>
@@ -1292,7 +1624,7 @@ function MyInformation() {
 
         {/* Shifokorni ko'rish modal oynasi */}
         {isViewModalOpen && viewDoctor && (
-          <div className="fixed inset-0 bg-opacity-10 flex items-center backdrop-blur-sm justify-center p-4 z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
                 <h2 className="text-2xl font-bold text-gray-800">Shifokor Profili</h2>
@@ -1343,8 +1675,18 @@ function MyInformation() {
                       <div className="bg-green-50 text-green-700 px-3 py-1 rounded-lg text-sm font-medium">
                         {viewDoctor.experienceYears || viewDoctor.experience || 0} yil tajriba
                       </div>
-                      {viewDoctor.isAvailable24x7 && (
+                      {viewDoctor.region && (
                         <div className="bg-purple-50 text-purple-700 px-3 py-1 rounded-lg text-sm font-medium">
+                          {viewDoctor.region}
+                        </div>
+                      )}
+                      {viewDoctor.city && (
+                        <div className="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg text-sm font-medium">
+                          {viewDoctor.city}
+                        </div>
+                      )}
+                      {viewDoctor.isAvailable24x7 && (
+                        <div className="bg-yellow-50 text-yellow-700 px-3 py-1 rounded-lg text-sm font-medium">
                           24/7 Mavjud
                         </div>
                       )}

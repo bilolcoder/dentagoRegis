@@ -9,6 +9,226 @@ import {
 } from 'lucide-react';
 import DentaGo from "../assets/dentago.png";
 
+const uzbekistanCities = [
+    // =========================
+    // QORAQALPOG'ISTON
+    // =========================
+    {
+        _id: "6964cadeb2a92667023e30c1",
+        label: "Nukus",
+        value: "nukus",
+        region: "Qoraqalpog'iston Respublikasi"
+    },
+    {
+        _id: "6964cadeb2a92667023e30c2",
+        label: "Xo'jayli",
+        value: "xojayli",
+        region: "Qoraqalpog'iston Respublikasi"
+    },
+    {
+        _id: "6964cadeb2a92667023e30c3",
+        label: "To'rtko'l",
+        value: "tortkol",
+        region: "Qoraqalpog'iston Respublikasi"
+    },
+    {
+        _id: "6964cadeb2a92667023e30c4",
+        label: "Beruniy",
+        value: "beruniy",
+        region: "Qoraqalpog'iston Respublikasi"
+    },
+    {
+        _id: "6964cadeb2a92667023e30c5",
+        label: "Qo'ng'irot",
+        value: "qongirot",
+        region: "Qoraqalpog'iston Respublikasi"
+    },
+
+    // =========================
+    // TOSHKENT SHAHAR
+    // =========================
+    {
+        _id: "6964cadeb2a92667023e30c6",
+        label: "Toshkent",
+        value: "toshkent",
+        region: "Toshkent shahri"
+    },
+
+    // =========================
+    // TOSHKENT VILOYATI
+    // =========================
+    {
+        _id: "6964cadeb2a92667023e30c7",
+        label: "Chirchiq",
+        value: "chirchiq",
+        region: "Toshkent viloyati"
+    },
+    {
+        _id: "6964cadeb2a92667023e30c8",
+        label: "Angren",
+        value: "angren",
+        region: "Toshkent viloyati"
+    },
+    {
+        _id: "6964cadeb2a92667023e30c9",
+        label: "Olmaliq",
+        value: "olmaliq",
+        region: "Toshkent viloyati"
+    },
+    {
+        _id: "6964cadeb2a92667023e30ca",
+        label: "Bekobod",
+        value: "bekobod",
+        region: "Toshkent viloyati"
+    },
+    {
+        _id: "6964cadeb2a92667023e30cb",
+        label: "Yangiyo'l",
+        value: "yangiyol",
+        region: "Toshkent viloyati"
+    },
+
+    // =========================
+    // SAMARQAND
+    // =========================
+    {
+        _id: "6964cadeb2a92667023e30cc",
+        label: "Samarqand",
+        value: "samarqand",
+        region: "Samarqand viloyati"
+    },
+    {
+        _id: "6964cadeb2a92667023e30cd",
+        label: "Kattaqo'rg'on",
+        value: "kattaqorgon",
+        region: "Samarqand viloyati"
+    },
+    {
+        _id: "6964cadeb2a92667023e30ce",
+        label: "Urgut",
+        value: "urgut",
+        region: "Samarqand viloyati"
+    },
+
+    // =========================
+    // BUXORO
+    // =========================
+    {
+        _id: "6964cadeb2a92667023e30cf",
+        label: "Buxoro",
+        value: "buxoro",
+        region: "Buxoro viloyati"
+    },
+    {
+        _id: "6964cadeb2a92667023e30d0",
+        label: "G'ijduvon",
+        value: "gijduvon",
+        region: "Buxoro viloyati"
+    },
+    {
+        _id: "6964cadeb2a92667023e30d1",
+        label: "Kogon",
+        value: "kogon",
+        region: "Buxoro viloyati"
+    },
+
+    // =========================
+    // FARG'ONA
+    // =========================
+    {
+        _id: "6964cadeb2a92667023e30d2",
+        label: "Farg'ona",
+        value: "fargona",
+        region: "Farg'ona viloyati"
+    },
+    {
+        _id: "6964cadeb2a92667023e30d3",
+        label: "Marg'ilon",
+        value: "margilon",
+        region: "Farg'ona viloyati"
+    },
+    {
+        _id: "6964cadeb2a92667023e30d4",
+        label: "Qo'qon",
+        value: "qoqon",
+        region: "Farg'ona viloyati"
+    },
+
+    // =========================
+    // ANDIJON
+    // =========================
+    {
+        _id: "6964cadeb2a92667023e30d5",
+        label: "Andijon",
+        value: "andijon",
+        region: "Andijon viloyati"
+    },
+    {
+        _id: "6964cadeb2a92667023e30d6",
+        label: "Asaka",
+        value: "asaka",
+        region: "Andijon viloyati"
+    },
+
+    // =========================
+    // NAMANGAN
+    // =========================
+    {
+        _id: "6964cadeb2a92667023e30d7",
+        label: "Namangan",
+        value: "namangan",
+        region: "Namangan viloyati"
+    },
+    {
+        _id: "6964cadeb2a92667023e30d8",
+        label: "Chust",
+        value: "chust",
+        region: "Namangan viloyati"
+    },
+
+    // =========================
+    // QASHQADARYO
+    // =========================
+    {
+        _id: "6964cadeb2a92667023e30d9",
+        label: "Qarshi",
+        value: "qarshi",
+        region: "Qashqadaryo viloyati"
+    },
+    {
+        _id: "6964cadeb2a92667023e30da",
+        label: "Shahrisabz",
+        value: "shahrisabz",
+        region: "Qashqadaryo viloyati"
+    },
+
+    // =========================
+    // SURXONDARYO
+    // =========================
+    {
+        _id: "6964cadeb2a92667023e30db",
+        label: "Termiz",
+        value: "termiz",
+        region: "Surxondaryo viloyati"
+    },
+
+    // =========================
+    // XORAZM
+    // =========================
+    {
+        _id: "6964cadeb2a92667023e30dc",
+        label: "Urganch",
+        value: "urganch",
+        region: "Xorazm viloyati"
+    },
+    {
+        _id: "6964cadeb2a92667023e30dd",
+        label: "Xiva",
+        value: "xiva",
+        region: "Xorazm viloyati"
+    }
+];
+
 const Registration = () => {
     const { loginWithPhone } = useData();
     const navigate = useNavigate();
@@ -34,11 +254,24 @@ const Registration = () => {
     const [isGeolocating, setIsGeolocating] = useState(false);
     const [isSmsSent, setIsSmsSent] = useState(false);
     const [canResendSms, setCanResendSms] = useState(false);
+    const [registrationSuccess, setRegistrationSuccess] = useState(false);
+
+    // Yangi state'lar - viloyat va tuman uchun
+    const [selectedRegion, setSelectedRegion] = useState('');
+    const [selectedCity, setSelectedCity] = useState('');
 
     const inputsRef = useRef([]);
     const dropdownRef = useRef(null);
     const phoneInputRef = useRef(null);
     const formRef = useRef(null);
+
+    // Barcha unikallik viloyatlarni olish
+    const regions = [...new Set(uzbekistanCities.map(city => city.region))].sort();
+
+    // Tanlangan viloyatga qarab tuman/shaharlar
+    const filteredCities = uzbekistanCities.filter(
+        city => city.region === selectedRegion
+    );
 
     // GPS so'rovni 2 soniyadan keyin ko'rsatish
     useEffect(() => {
@@ -236,7 +469,7 @@ const Registration = () => {
 
     const onSubmitPersonalData = async (data) => {
         // Form allaqachon yuborilmoqda bo'lsa, to'xtatish
-        if (isSubmitting) {
+        if (isSubmitting || registrationSuccess) {
             return;
         }
 
@@ -253,7 +486,17 @@ const Registration = () => {
             return;
         }
 
+        if (!selectedRegion || !selectedCity) {
+            setError('Viloyat va tuman/shaharni tanlang');
+            setIsLoading(false);
+            setIsSubmitting(false);
+            return;
+        }
+
         const fullPhone = `+${cleanPhone}`;
+
+        // Tanlangan shahar ma'lumotlarini olish
+        const selectedCityData = uzbekistanCities.find(city => city.value === selectedCity);
 
         const payload = {
             username: `${data.firstName.trim()} ${data.lastName.trim()}`,
@@ -263,12 +506,16 @@ const Registration = () => {
             role: userType,
             userType: userType,
             serviceId: true,
+            city: selectedCityData ? selectedCityData.label : selectedCity,
+            region: selectedRegion,
             location: userLocation ? {
                 latitude: userLocation.latitude,
                 longitude: userLocation.longitude,
                 address: data.location || ''
             } : null
         };
+
+        console.log('APIga jo\'natilayotgan ma\'lumotlar:', payload);
 
         try {
             const response = await fetch('https://app.dentago.uz/api/auth/app/register', {
@@ -277,8 +524,18 @@ const Registration = () => {
                 body: JSON.stringify(payload),
             });
             const result = await response.json();
+
             if (response.ok && result.success) {
-                await sendSmsForRegistration();
+                // Registration muvaffaqiyatli bo'lganda
+                setRegistrationSuccess(true);
+
+                // SMS server tomonidan avtomatik yuboriladi, shuning uchun faqat SMS sahifasiga o'tamiz
+                setIsSmsSent(true);
+                setCanResendSms(false);
+                setCountdown(60);
+                setIsSmsStep(true);
+
+                console.log('Registration muvaffaqiyatli. SMS server tomonidan yuborildi.');
             } else {
                 setError(result.message || 'Roʻyxatdan oʻtishda xato');
             }
@@ -310,7 +567,7 @@ const Registration = () => {
                 localStorage.setItem('userRole', userType);
                 loginWithPhone(fullPhone);
                 setTimeout(() => navigate('/dashboard'), 800);
-            } else {
+            }  else {
                 setInputBorderState('error');
                 setError(data.message || 'Kod notoʻgʻri');
             }
@@ -337,7 +594,8 @@ const Registration = () => {
         setIsSmsStep(false);
         setSmsCode('');
         setInputBorderState('default');
-        // SMS sent statusini saqlab qolamiz, lekin qayta yuborish imkonini yoqamiz
+        // Registration statusini qayta o'rnatish
+        setRegistrationSuccess(false);
         setCanResendSms(true);
     };
 
@@ -572,8 +830,54 @@ const Registration = () => {
                                             <p className="text-xs text-gray-500 mt-1">+998 bilan boshlansin</p>
                                         </div>
 
+                                        {/* Viloyat */}
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-semibold text-gray-500">Viloyat *</label>
+                                            <select
+                                                value={selectedRegion}
+                                                onChange={(e) => {
+                                                    setSelectedRegion(e.target.value);
+                                                    setSelectedCity(''); // viloyat o'zgarganda tuman tozalanadi
+                                                }}
+                                                className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none text-sm"
+                                                required
+                                            >
+                                                <option value="">Viloyatni tanlang</option>
+                                                {regions.map(region => (
+                                                    <option key={region} value={region}>
+                                                        {region}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {!selectedRegion && (
+                                                <p className="text-red-500 text-xs mt-1">Viloyatni tanlang</p>
+                                            )}
+                                        </div>
+
+                                        {/* Tuman/Shahar */}
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-semibold text-gray-500">Tuman/Shahar *</label>
+                                            <select
+                                                value={selectedCity}
+                                                onChange={(e) => setSelectedCity(e.target.value)}
+                                                disabled={!selectedRegion}
+                                                className={`w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none text-sm ${!selectedRegion ? 'opacity-60 cursor-not-allowed' : ''}`}
+                                                required
+                                            >
+                                                <option value="">Tuman/Shaharni tanlang</option>
+                                                {filteredCities.map(city => (
+                                                    <option key={city._id} value={city.value}>
+                                                        {city.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {!selectedCity && selectedRegion && (
+                                                <p className="text-red-500 text-xs mt-1">Tuman/Shaharni tanlang</p>
+                                            )}
+                                        </div>
+
                                         {/* User Type */}
-                                        <div className="space-y-1 sm:col-span-2 lg:col-span-1" ref={dropdownRef}>
+                                        <div className="space-y-1" ref={dropdownRef}>
                                             <label className="text-xs font-semibold text-gray-500">Foydalanuvchi turi *</label>
                                             <div className="relative">
                                                 <button
@@ -704,7 +1008,7 @@ const Registration = () => {
                                     <div className="pt-4">
                                         <button
                                             type="submit"
-                                            disabled={isLoading || isSubmitting}
+                                            disabled={isLoading || isSubmitting || registrationSuccess}
                                             className="w-full py-3.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold rounded-xl shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             {isLoading || isSubmitting ? (
@@ -712,6 +1016,8 @@ const Registration = () => {
                                                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                                                     <span>Yuklanmoqda...</span>
                                                 </div>
+                                            ) : registrationSuccess ? (
+                                                'SMS yuborildi...'
                                             ) : (
                                                 'Roʻyxatdan oʻtish'
                                             )}

@@ -217,7 +217,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                         {/* Yopish tugmasi - faqat mobilda */}
                         <button
                             onClick={handleClose}
-                            className="md:hidden absolute top-4 right-4 p-2 text-slate-400 hover:text-[#00BCE4] hover:bg-blue-50 rounded-lg transition-all"
+                            className="mdnpm run dev:hidden absolute top-4 right-4 p-2 text-slate-400 hover:text-[#00BCE4] hover:bg-blue-50 rounded-lg transition-all"
                             aria-label="Yopish"
                         >
                             <X size={20} />
