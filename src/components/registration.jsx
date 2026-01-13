@@ -258,7 +258,8 @@ const Registration = () => {
 
     // Yangi state'lar - viloyat va tuman uchun
     const [selectedRegion, setSelectedRegion] = useState('');
-    const [selectedCity, setSelectedCity] = useState('');
+    const [selectedCityId, setSelectedCityId] = useState(''); // ID ni saqlash uchun
+    const [selectedCityName, setSelectedCityName] = useState(''); // Nomini ham saqlash
 
     const inputsRef = useRef([]);
     const dropdownRef = useRef(null);
@@ -372,7 +373,7 @@ const Registration = () => {
 
     const userTypeOptions = [
         { value: 'user', label: 'Bemor', icon: BriefcaseMedical },
-        { value: 'doctor', label: 'Stamatolog', icon: Stethoscope },
+        { value: 'doctor', label: 'Stomatolog', icon: Stethoscope }, // "Stamatolog" emas "Stomatolog"
         { value: 'master', label: 'Usta', icon: Wrench },
         { value: 'technician', label: 'Zub-texnik', icon: Award }
     ];
@@ -486,8 +487,18 @@ const Registration = () => {
             return;
         }
 
-        if (!selectedRegion || !selectedCity) {
+        if (!selectedRegion || !selectedCityId) {
             setError('Viloyat va tuman/shaharni tanlang');
+            setIsLoading(false);
+            setIsSubmitting(false);
+            return;
+        }
+
+        // Tanlangan shahar ma'lumotlarini olish
+        const selectedCityData = uzbekistanCities.find(city => city._id === selectedCityId);
+
+        if (!selectedCityData) {
+            setError('Tanlangan shahar topilmadi. Iltimos, qayta tanlang.');
             setIsLoading(false);
             setIsSubmitting(false);
             return;
@@ -495,9 +506,23 @@ const Registration = () => {
 
         const fullPhone = `+${cleanPhone}`;
 
-        // Tanlangan shahar ma'lumotlarini olish
-        const selectedCityData = uzbekistanCities.find(city => city.value === selectedCity);
+        // KONSOLGA JO'NATILAYOTGAN MA'LUMOTLARNI CHIQARAMIZ
+        console.log('=== FORM MA\'LUMOTLARI ===');
+        console.log('Ism:', data.firstName);
+        console.log('Familiya:', data.lastName);
+        console.log('Telefon:', fullPhone);
+        console.log('Tug\'ilgan sana:', data.birthDate);
+        console.log('Formatlangan sana:', formatBirthDate(data.birthDate));
+        console.log('Jins:', gender);
+        console.log('Foydalanuvchi turi:', userType);
+        console.log('Viloyat:', selectedRegion);
+        console.log('Shahar ID:', selectedCityId);
+        console.log('Shahar nomi:', selectedCityData.label);
+        console.log('Manzil:', data.location);
+        console.log('GPS:', userLocation);
+        console.log('========================');
 
+        // Yangi payload - faqat city ga ID ni jo'natamiz
         const payload = {
             username: `${data.firstName.trim()} ${data.lastName.trim()}`,
             birthdate: formatBirthDate(data.birthDate),
@@ -506,7 +531,7 @@ const Registration = () => {
             role: userType,
             userType: userType,
             serviceId: true,
-            city: selectedCityData ? selectedCityData.label : selectedCity,
+            city: selectedCityId, // ✅ Faqat ID ni jo'natamiz (string)
             region: selectedRegion,
             location: userLocation ? {
                 latitude: userLocation.latitude,
@@ -515,7 +540,7 @@ const Registration = () => {
             } : null
         };
 
-        console.log('APIga jo\'natilayotgan ma\'lumotlar:', payload);
+        console.log('=== PAYLOAD ===', payload);
 
         try {
             const response = await fetch('https://app.dentago.uz/api/auth/app/register', {
@@ -523,23 +548,29 @@ const Registration = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
+
+            console.log('=== SERVER RESPONSE ===');
+            console.log('Status:', response.status);
+
             const result = await response.json();
+            console.log('Result:', result);
 
             if (response.ok && result.success) {
                 // Registration muvaffaqiyatli bo'lganda
                 setRegistrationSuccess(true);
 
-                // SMS server tomonidan avtomatik yuboriladi, shuning uchun faqat SMS sahifasiga o'tamiz
+                // SMS server tomonidan avtomatik yuboriladi
                 setIsSmsSent(true);
                 setCanResendSms(false);
                 setCountdown(60);
                 setIsSmsStep(true);
 
-                console.log('Registration muvaffaqiyatli. SMS server tomonidan yuborildi.');
+                console.log('✅ Registration muvaffaqiyatli!');
             } else {
                 setError(result.message || 'Roʻyxatdan oʻtishda xato');
             }
         } catch (err) {
+            console.error('❌ Server xatosi:', err);
             setError('Server bilan aloqa xatosi');
         } finally {
             setIsLoading(false);
@@ -594,7 +625,6 @@ const Registration = () => {
         setIsSmsStep(false);
         setSmsCode('');
         setInputBorderState('default');
-        // Registration statusini qayta o'rnatish
         setRegistrationSuccess(false);
         setCanResendSms(true);
     };
@@ -606,6 +636,18 @@ const Registration = () => {
     };
 
     const selectedUserType = userTypeOptions.find(opt => opt.value === userType);
+
+    // Shahar tanlanganda
+    const handleCityChange = (e) => {
+        const cityId = e.target.value;
+        setSelectedCityId(cityId);
+
+        // Tanlangan shahar ma'lumotlarini olish
+        const selectedCity = uzbekistanCities.find(city => city._id === cityId);
+        if (selectedCity) {
+            setSelectedCityName(selectedCity.label);
+        }
+    };
 
     return (
         <div className="fixed inset-0 w-full h-full font-sans bg-gray-900">
@@ -837,7 +879,8 @@ const Registration = () => {
                                                 value={selectedRegion}
                                                 onChange={(e) => {
                                                     setSelectedRegion(e.target.value);
-                                                    setSelectedCity(''); // viloyat o'zgarganda tuman tozalanadi
+                                                    setSelectedCityId(''); // viloyat o'zgarganda tuman tozalanadi
+                                                    setSelectedCityName('');
                                                 }}
                                                 className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none text-sm"
                                                 required
@@ -854,25 +897,31 @@ const Registration = () => {
                                             )}
                                         </div>
 
-                                        {/* Tuman/Shahar */}
+                                        {/* Tuman/Shahar - ID ni saqlash uchun */}
                                         <div className="space-y-1">
                                             <label className="text-xs font-semibold text-gray-500">Tuman/Shahar *</label>
                                             <select
-                                                value={selectedCity}
-                                                onChange={(e) => setSelectedCity(e.target.value)}
+                                                value={selectedCityId}
+                                                onChange={handleCityChange}
                                                 disabled={!selectedRegion}
                                                 className={`w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none text-sm ${!selectedRegion ? 'opacity-60 cursor-not-allowed' : ''}`}
                                                 required
                                             >
                                                 <option value="">Tuman/Shaharni tanlang</option>
                                                 {filteredCities.map(city => (
-                                                    <option key={city._id} value={city.value}>
+                                                    <option key={city._id} value={city._id}>
                                                         {city.label}
+                                                        {selectedCityId === city._id && ` (ID: ${city._id})`}
                                                     </option>
                                                 ))}
                                             </select>
-                                            {!selectedCity && selectedRegion && (
+                                            {!selectedCityId && selectedRegion && (
                                                 <p className="text-red-500 text-xs mt-1">Tuman/Shaharni tanlang</p>
+                                            )}
+                                            {selectedCityId && (
+                                                <p className="text-xs text-green-600 mt-1">
+                                                    Tanlangan: {selectedCityName} (ID: {selectedCityId})
+                                                </p>
                                             )}
                                         </div>
 
@@ -1095,8 +1144,9 @@ const Registration = () => {
                         {/* Footer */}
                         <div className="p-5 md:p-8 border-t border-gray-100 rounded-b-2xl bg-gray-50">
                             <p className="text-center text-xs text-gray-500">
-                                Ro'yxatdan o'tish orqali siz bizning{' '}shartlar{' '}
-                                va{' '}
+                                Ro'yxatdan o'tish orqali siz bizning{' '}
+                                <a href="#" className="text-blue-600 hover:text-blue-800 underline">shartlar</a>
+                                {' '}va{' '}
                                 <a href="#" className="text-blue-600 hover:text-blue-800 underline">maxfiylik siyosati</a>{' '}
                                 ga rozilik bildirasiz
                             </p>

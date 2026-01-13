@@ -67,12 +67,13 @@ const Header = ({ setIsSidebarOpen, isSidebarOpen, currentPage }) => {
     // Foydalanuvchi ma'lumotlari
     const getCurrentUser = () => {
         const stored = localStorage.getItem('userData');
+        const rolee = localStorage.getItem('userRole') || '';
         if (stored) {
             try {
                 const parsed = JSON.parse(stored);
                 return {
                     username: parsed.name || parsed.username || 'Foydalanuvchi',
-                    role: parsed.role === 'user' ? 'OPERATOR' : (parsed.role || 'OPERATOR').toUpperCase()
+                    role: rolee === 'user' ? 'OPERATOR' : (parsed.role || 'OPERATOR').toUpperCase()
                 };
             } catch (e) {
                 console.error("userData parse xatosi:", e);
@@ -89,10 +90,10 @@ const Header = ({ setIsSidebarOpen, isSidebarOpen, currentPage }) => {
         const phone = localStorage.getItem('userPhone') || '';
         const formattedPhone = phone ? phone.replace('+998', '9') : 'Foydalanuvchi';
 
-        return {
-            username: formattedPhone,
-            role: 'OPERATOR'
-        };
+        // return {
+        //     username: formattedPhone,
+        //     role: rolee || 'role kiritilmagan'
+        // };
     };
 
     const user = getCurrentUser();
