@@ -240,11 +240,11 @@ const Registration = () => {
     const [imagePreview, setImagePreview] = useState(null);
     const [gender, setGender] = useState('male');
     const [userType, setUserType] = useState('user');
-    const [error, setError] = useState('');
+    const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSmsStep, setIsSmsStep] = useState(false);
-    const [smsCode, setSmsCode] = useState('');
+    const [smsCode, setSmsCode] = useState("");
     const [countdown, setCountdown] = useState(0);
     const [inputBorderState, setInputBorderState] = useState('default');
     const [showUserTypeDropdown, setShowUserTypeDropdown] = useState(false);
@@ -257,9 +257,9 @@ const Registration = () => {
     const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
     // Yangi state'lar - viloyat va tuman uchun
-    const [selectedRegion, setSelectedRegion] = useState('');
-    const [selectedCityId, setSelectedCityId] = useState(''); // ID ni saqlash uchun
-    const [selectedCityName, setSelectedCityName] = useState(''); // Nomini ham saqlash
+    const [selectedRegion, setSelectedRegion] = useState("");
+    const [selectedCityId, setSelectedCityId] = useState(""); // ID ni saqlash uchun
+    const [selectedCityName, setSelectedCityName] = useState(""); // Nomini ham saqlash
 
     const inputsRef = useRef([]);
     const dropdownRef = useRef(null);
@@ -311,7 +311,7 @@ const Registration = () => {
         }
 
         setIsGeolocating(true);
-        setError('');
+        setError("");
 
         navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -390,7 +390,7 @@ const Registration = () => {
 
     // Telefon raqam formatlash
     const formatPhoneNumber = (value) => {
-        let numbers = value.replace(/\D/g, '');
+        let numbers = value.replace(/\D/g, "");
 
         if (numbers.startsWith('998')) {
             numbers = numbers.substring(3);
@@ -414,7 +414,7 @@ const Registration = () => {
 
     // Telefon raqamni faqat raqamlarga aylantirish
     const getCleanPhoneNumber = () => {
-        const clean = phoneNumber.replace(/\D/g, '');
+        const clean = phoneNumber.replace(/\D/g, "");
         if (clean.length === 9) {
             return '998' + clean;
         }
@@ -422,7 +422,7 @@ const Registration = () => {
     };
 
     const formatBirthDate = (dateString) => {
-        if (!dateString) return '';
+        if (!dateString) return "";
         const [year, month, day] = dateString.split('-');
         return `${day}.${month}.${year}`;
     };
@@ -435,7 +435,7 @@ const Registration = () => {
         }
 
         setIsLoading(true);
-        setError('');
+        setError("");
         const cleanPhone = getCleanPhoneNumber();
         const fullPhone = `+${cleanPhone}`;
 
@@ -474,7 +474,7 @@ const Registration = () => {
             return;
         }
 
-        setError('');
+        setError("");
         setIsSubmitting(true);
         setIsLoading(true);
 
@@ -536,7 +536,7 @@ const Registration = () => {
             location: userLocation ? {
                 latitude: userLocation.latitude,
                 longitude: userLocation.longitude,
-                address: data.location || ''
+                address: data.location || ""
             } : null
         };
 
@@ -612,9 +612,9 @@ const Registration = () => {
 
     const handleSmsInputChange = (index, value) => {
         if (!/^\d?$/.test(value)) return;
-        const newCodeArr = smsCode.split('');
+        const newCodeArr = smsCode.split("");
         newCodeArr[index] = value;
-        const newCode = newCodeArr.join('');
+        const newCode = newCodeArr.join("");
         setSmsCode(newCode);
         if (value && index < 5) inputsRef.current[index + 1]?.focus();
         if (newCode.length === 6) handleSmsConfirm(newCode);
@@ -623,7 +623,7 @@ const Registration = () => {
     // SMS sahifasidan orqaga qaytish
     const handleBackFromSms = () => {
         setIsSmsStep(false);
-        setSmsCode('');
+        setSmsCode("");
         setInputBorderState('default');
         setRegistrationSuccess(false);
         setCanResendSms(true);
@@ -879,8 +879,8 @@ const Registration = () => {
                                                 value={selectedRegion}
                                                 onChange={(e) => {
                                                     setSelectedRegion(e.target.value);
-                                                    setSelectedCityId(''); // viloyat o'zgarganda tuman tozalanadi
-                                                    setSelectedCityName('');
+                                                    setSelectedCityId(""); // viloyat o'zgarganda tuman tozalanadi
+                                                    setSelectedCityName("");
                                                 }}
                                                 className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none text-sm"
                                                 required
@@ -904,7 +904,7 @@ const Registration = () => {
                                                 value={selectedCityId}
                                                 onChange={handleCityChange}
                                                 disabled={!selectedRegion}
-                                                className={`w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none text-sm ${!selectedRegion ? 'opacity-60 cursor-not-allowed' : ''}`}
+                                                className={`w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none text-sm ${!selectedRegion ? 'opacity-60 cursor-not-allowed' : ""}`}
                                                 required
                                             >
                                                 <option value="">Tuman/Shaharni tanlang</option>
@@ -938,7 +938,7 @@ const Registration = () => {
                                                         {selectedUserType && <selectedUserType.icon className="w-4 h-4 text-blue-500" />}
                                                         <span className="text-gray-700">{selectedUserType?.label}</span>
                                                     </div>
-                                                    <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${showUserTypeDropdown ? 'rotate-180' : ''}`} />
+                                                    <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${showUserTypeDropdown ? 'rotate-180' : ""}`} />
                                                 </button>
                                                 {showUserTypeDropdown && (
                                                     <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto">
@@ -1013,7 +1013,7 @@ const Registration = () => {
                                                 <input
                                                     {...register('location')}
                                                     type="text"
-                                                    defaultValue={userLocation?.address || ''}
+                                                    defaultValue={userLocation?.address || ""}
                                                     className="w-full text-black pl-10 pr-10 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all text-sm"
                                                     placeholder="Manzilingizni kiriting yoki GPS orqali aniqlang"
                                                 />
@@ -1102,7 +1102,7 @@ const Registration = () => {
                                                     type="text"
                                                     inputMode="numeric"
                                                     maxLength="1"
-                                                    value={smsCode[i] || ''}
+                                                    value={smsCode[i] || ""}
                                                     onChange={(e) => handleSmsInputChange(i, e.target.value)}
                                                     onKeyDown={(e) => {
                                                         if (e.key === 'Backspace' && !smsCode[i] && i > 0) inputsRef.current[i - 1]?.focus();
