@@ -18,6 +18,7 @@ const ProfileContent = () => {
     username: '',
     phone: '',
     company: '',
+    role: '',           // Role state
     birthdate: '',
     gender: 'male',
     image: null,        // yangi yuklangan rasm (base64)
@@ -68,6 +69,7 @@ const ProfileContent = () => {
             username: data.user.username || '',
             phone: data.user.phone || '',
             company: data.user.company || '',
+            role: localStorage.getItem('userRole') || data.user.role || 'USER', // Role localStorage dan olindi
             birthdate: formattedBirthDate,
             gender: data.user.gender || 'male',
             image: null,
@@ -288,14 +290,26 @@ const ProfileContent = () => {
               <input
                 type="text"
                 readOnly={!isEditing}
-                value={formData.company}
+                value={formData.company || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
                 placeholder="Название вашей компании"
+                autoComplete="organization"
                 className={`w-full px-5 py-4 rounded-2xl italic transition-all
                   ${isEditing
                     ? 'bg-gray-50 border-2 border-[#00BCE4] focus:ring-4 focus:ring-[#00BCE4]/20 text-gray-900'
                     : 'bg-gray-100 text-gray-700'
                   }`}
+              />
+            </div>
+
+            {/* Role (Lavozim) - Read Only */}
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-2">Роль</label>
+              <input
+                type="text"
+                readOnly
+                value={formData.role || 'Foydalanuvchi'}
+                className="w-full px-5 py-4 bg-gray-100 rounded-2xl text-gray-900 font-medium cursor-not-allowed opacity-80"
               />
             </div>
 
