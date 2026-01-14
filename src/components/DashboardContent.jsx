@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 // Chiroyli va mantiqiy iconlar
-import { 
+import {
     ShoppingBag,    // Jami buyurtmalar
     CheckCircle2,   // To'langanlar
     Wallet,         // To'lov kutilmoqda
     Zap,            // Jarayonda
     Truck,          // Yetkazilmoqda
     PackageCheck,   // Yetkazib berildi
-    Calendar, 
-    Users, 
-    ChevronRight, 
+    Calendar,
+    Users,
+    ChevronRight,
     ShieldCheck,
     Briefcase
 } from 'lucide-react';
@@ -24,7 +24,7 @@ const DashboardContent = () => {
     const { data, t, logout } = useData();
     const navigate = useNavigate();
     const dateInputRef = useRef(null);
-    
+
     // API ma'lumotlari uchun statelar
     const [selectedDate, setSelectedDate] = useState('2025-01-12');
     const [orderStats, setOrderStats] = useState(null);
@@ -38,7 +38,7 @@ const DashboardContent = () => {
         try {
             setLoadingStats(true);
             const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-            
+
             const response = await axios.get(`${BASE_URL}/api/order/stats`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -75,65 +75,65 @@ const DashboardContent = () => {
     const services = data.services || [];
     const payments = data.payments || [];
     const staff = data.staff || [];
-    
+
     const dentistsCount = staff.filter(s => s.position === 'Shifokor').length;
     const staffCount = staff.length;
 
     // API'dan kelgan ma'lumotlarga asoslangan 6 ta karta
     const topStats = [
-        { 
-            title: "Jami Buyurtmalar", 
-            value: orderStats?.totalOrders || 0, 
-            icon: ShoppingBag, 
+        {
+            title: "Jami Buyurtmalar",
+            value: orderStats?.totalOrders || 0,
+            icon: ShoppingBag,
             link: "/cards",
-            color: "#0ea5e9" 
+            color: "#0ea5e9"
         },
-        { 
-            title: "To'langanlar", 
-            value: orderStats?.paid || 0, 
-            icon: CheckCircle2, 
+        {
+            title: "To'langanlar",
+            value: orderStats?.paid || 0,
+            icon: CheckCircle2,
             link: "#",
-            color: "#10b981" 
+            color: "#10b981"
         },
-        { 
-            title: "To'lov kutilmoqda", 
-            value: orderStats?.pendingPayment || 0, 
-            icon: Wallet, 
+        {
+            title: "To'lov kutilmoqda",
+            value: orderStats?.pendingPayment || 0,
+            icon: Wallet,
             link: "#",
-            color: "#f59e0b" 
+            color: "#f59e0b"
         },
-        { 
-            title: "Jarayonda", 
-            value: orderStats?.processing || 0, 
-            icon: Zap, 
+        {
+            title: "Jarayonda",
+            value: orderStats?.processing || 0,
+            icon: Zap,
             link: "#",
-            color: "#6366f1" 
+            color: "#6366f1"
         },
-        { 
-            title: "Yetkazilmoqda", 
-            value: orderStats?.shipped || 0, 
-            icon: Truck, 
+        {
+            title: "Yetkazilmoqda",
+            value: orderStats?.shipped || 0,
+            icon: Truck,
             link: "#",
-            color: "#8b5cf6" 
+            color: "#8b5cf6"
         },
-        { 
-            title: "Yetkazib berildi", 
-            value: orderStats?.delivered || 0, 
-            icon: PackageCheck, 
+        {
+            title: "Yetkazib berildi",
+            value: orderStats?.delivered || 0,
+            icon: PackageCheck,
             link: "#",
-            color: "#22c55e" 
+            color: "#22c55e"
         },
-        { 
-            title: "test", 
-            value: orderStats?.shipped || 0, 
-            icon:  PackageCheck, 
-            color: "#22c55e" 
+        {
+            title: "test",
+            value: orderStats?.shipped || 0,
+            icon:  PackageCheck,
+            color: "#22c55e"
         },
-        { 
-            title: "test", 
-            value: orderStats?.delivered || 0, 
-            icon: PackageCheck, 
-            color: "#22c55e" 
+        {
+            title: "test",
+            value: orderStats?.delivered || 0,
+            icon: PackageCheck,
+            color: "#22c55e"
         },
     ];
 
@@ -172,16 +172,16 @@ const DashboardContent = () => {
 
             <div className="p-4 md:p-8 space-y-6">
                 {/* Dashboard Kartalari - 6 ta karta grid tizimida */}
-                <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                <section className="grid grid-cols-2 max-sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
                     {topStats.map((stat, index) => (
-                        <Link 
-                            to={stat.link} 
-                            key={index} 
+                        <Link
+                            to={stat.link}
+                            key={index}
                             className="p-6 rounded-2xl bg-white border border-slate-100 shadow-sm flex justify-between items-center transition-all duration-300 hover:scale-[1.02] hover:shadow-lg group"
                         >
                             <div className="flex items-center gap-5">
-                                <div 
-                                    className="p-4 rounded-2xl transition-all duration-300 group-hover:rotate-6" 
+                                <div
+                                    className="p-4 rounded-2xl transition-all duration-300 group-hover:rotate-6"
                                     style={{ backgroundColor: `${stat.color}15`, color: stat.color }}
                                 >
 

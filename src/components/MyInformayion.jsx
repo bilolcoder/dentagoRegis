@@ -994,7 +994,7 @@ function MyInformation() {
           </div>
 
           {/* Qidiruv va token holati */}
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-1 gap-4">
             <div className="relative">
               <Search className="absolute left-4 top-1/3 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
@@ -1006,7 +1006,7 @@ function MyInformation() {
               />
             </div>
 
-            {token ? (
+            {/* {token ? (
               <div className="bg-green-50 border border-green-200 rounded-xl p-4">
                 <div className="flex items-center gap-3 text-green-700">
                   <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
@@ -1038,7 +1038,7 @@ function MyInformation() {
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         </div>
 
@@ -1631,7 +1631,7 @@ function MyInformation() {
 
         {/* Shifokorni ko'rish modal oynasi */}
         {isViewModalOpen && viewDoctor && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
             <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
                 <h2 className="text-2xl font-bold text-gray-800">Shifokor Profili</h2>

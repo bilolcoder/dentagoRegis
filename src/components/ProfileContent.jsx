@@ -132,7 +132,7 @@ const ProfileContent = () => {
         username: formData.username.trim(),
         gender: formData.gender,
         birthdate: formData.birthdate || null,
-        company: formData.company.trim() || null
+        companyName: formData.company.trim() || null
       };
 
       if (formData.image) {
@@ -161,8 +161,24 @@ const ProfileContent = () => {
         role: 'OPERATOR'
       }));
 
+      // Update UI state immediately
+      const fullName = formData.username.trim();
+      const nameParts = fullName.split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.slice(1).join(' ');
+
+      setUser(prev => ({
+        ...prev,
+        fullName,
+        firstName,
+        lastName,
+        company: formData.company,
+        gender: formData.gender === 'female' ? 'Ayol' : 'Erkak'
+      }));
+
       setTimeout(() => {
-        window.location.reload();
+        setIsEditing(false);
+        setSuccess('');
       }, 1500);
 
     } catch (err) {
@@ -211,7 +227,7 @@ const ProfileContent = () => {
         </div>
 
         {/* Asosiy kartochka */}
-        <div className="bg-white rounded-3xl shadow-xl p-8 md:p-12">
+        <div className="rounded-3xl shadow-xl p-8 md:p-12">
           {/* Avatar */}
           <div className="flex flex-col items-center mb-10 relative">
             <div className="relative">
