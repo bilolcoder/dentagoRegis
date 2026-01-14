@@ -64,7 +64,7 @@ const Header = ({ setIsSidebarOpen, isSidebarOpen, currentPage }) => {
         logout
     } = useData();
 
-    // Foydalanuvchi ma'lumotlari
+    // Foydalanuvchi ma'lumotlari olish
     const getCurrentUser = () => {
         const manualRole = localStorage.getItem('userRole');
         const getRole = (r) => manualRole ? manualRole.toUpperCase() : (r === 'user' ? 'OPERATOR' : (r || 'OPERATOR').toUpperCase());
